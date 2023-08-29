@@ -1,0 +1,23 @@
+# Ignore compiled Java classes and JAR files
+*.class
+*.jar
+
+# Ignore Python bytecode files
+__pycache__/
+
+# Ignore virtual environment folders for Python
+venv/
+env/
+*.pyc
+
+# Ignore IDE or editor-specific files and directories
+.idea/
+.vscode/
+*.iml
+
+# Ignore log and temporary files
+*.log
+*.swp
+
+# Ignore project-specific config files
+*.properties
