@@ -3,12 +3,12 @@
 package "Database Schema" {
 
   enum status_enum {
-    Active
+    Active,
     Inactive
   }
 
   enum lob_enum {
-    Medicare
+    Medicare,
     Commercial
   }
 
@@ -28,7 +28,8 @@ package "Database Schema" {
 
   entity "manager" {
     manager_id : SERIAL [PK]
-    manager_name : VARCHAR
+    managerFirstName : VARCHAR
+    managerLastName : VARCHAR
     active_status : status_enum
     LOB : lob_enum
   }
@@ -58,12 +59,32 @@ package "Database Schema" {
     active_status : status_enum
   }
 
+  entity "staff_history" {
+    history_id : SERIAL [PK]
+    staff_id : INT [FK]
+    ...
+    change_type : VARCHAR
+    change_timestamp : TIMESTAMP
+  }
+
+  entity "staff_language_history" {
+    history_id : SERIAL [PK]
+    staff_id : INT [FK]
+    language_id : INT [FK]
+    ...
+    change_type : VARCHAR
+    change_timestamp : TIMESTAMP
+  }
+
   staff "0..n" -- "1" team : has
   staff "0..n" -- "1" role : has
   staff "0..n" -- "1" manager : reports to
 
   staff_language "0..n" -- "1" staff : links
   staff_language "0..n" -- "1" language : speaks
+
+  staff_history "0..n" -- "1" staff : records change of
+  staff_language_history "0..n" -- "1" staff_language : records change of
 }
 
 @enduml
