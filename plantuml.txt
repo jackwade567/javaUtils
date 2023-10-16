@@ -76,6 +76,31 @@ package "Database Schema" {
     change_timestamp : TIMESTAMP
   }
 
+  entity "member" {
+    member_id : SERIAL [PK]
+    cipId : VARCHAR
+    first_name : VARCHAR
+    last_name : VARCHAR
+    active_status : status_enum
+  }
+
+  entity "member_language" {
+    member_id : INT [FK]
+    language_id : INT [FK]
+    updated_by_staff_id : INT [FK]
+    active_status : status_enum
+  }
+
+  entity "member_language_history" {
+    history_id : SERIAL [PK]
+    member_id : INT [FK]
+    language_id : INT [FK]
+    updated_by_staff_id : INT [FK]
+    ...
+    change_type : VARCHAR
+    change_timestamp : TIMESTAMP
+  }
+
   staff "0..n" -- "1" team : has
   staff "0..n" -- "1" role : has
   staff "0..n" -- "1" manager : reports to
@@ -85,6 +110,13 @@ package "Database Schema" {
 
   staff_history "0..n" -- "1" staff : records change of
   staff_language_history "0..n" -- "1" staff_language : records change of
+
+  member_language "0..n" -- "1" member : speaks
+  member_language "0..n" -- "1" language : spoken by
+  member_language "0..n" -- "1" staff : updated by
+  
+  member_language_history "0..n" -- "1" member_language : records change of
+
 }
 
 @enduml
