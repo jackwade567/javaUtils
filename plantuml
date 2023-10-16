@@ -1,0 +1,69 @@
+@startuml
+
+package "Database Schema" {
+
+  enum status_enum {
+    Active
+    Inactive
+  }
+
+  enum lob_enum {
+    Medicare
+    Commercial
+  }
+
+  entity "team" {
+    team_id : SERIAL [PK]
+    team_name : VARCHAR
+    active_status : status_enum
+    LOB : lob_enum
+  }
+
+  entity "role" {
+    role_id : SERIAL [PK]
+    role_name : VARCHAR
+    active_status : status_enum
+    LOB : lob_enum
+  }
+
+  entity "manager" {
+    manager_id : SERIAL [PK]
+    manager_name : VARCHAR
+    active_status : status_enum
+    LOB : lob_enum
+  }
+
+  entity "language" {
+    language_id : SERIAL [PK]
+    lang_name : VARCHAR
+    active_status : status_enum
+    LOB : lob_enum
+  }
+
+  entity "staff" {
+    staff_id : SERIAL [PK]
+    racf : VARCHAR
+    first_name : VARCHAR
+    last_name : VARCHAR
+    team_id : INT [FK]
+    role_id : INT [FK]
+    manager_id : INT [FK]
+    LOB : lob_enum
+    active_status : status_enum
+  }
+
+  entity "staff_language" {
+    staff_id : INT [FK]
+    language_id : INT [FK]
+    active_status : status_enum
+  }
+
+  staff "0..n" -- "1" team : has
+  staff "0..n" -- "1" role : has
+  staff "0..n" -- "1" manager : reports to
+
+  staff_language "0..n" -- "1" staff : links
+  staff_language "0..n" -- "1" language : speaks
+}
+
+@enduml
