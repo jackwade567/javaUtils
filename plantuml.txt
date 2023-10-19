@@ -1,122 +1,135 @@
 @startuml
+package "Enum Definitions" {
+    enum "status_enum" {
+        Active
+        Inactive
+    }
 
-package "Database Schema" {
-
-  enum status_enum {
-    Active,
-    Inactive
-  }
-
-  enum lob_enum {
-    Medicare,
-    Commercial
-  }
-
-  entity "team" {
-    team_id : SERIAL [PK]
-    team_name : VARCHAR
-    active_status : status_enum
-    LOB : lob_enum
-  }
-
-  entity "role" {
-    role_id : SERIAL [PK]
-    role_name : VARCHAR
-    active_status : status_enum
-    LOB : lob_enum
-  }
-
-  entity "manager" {
-    manager_id : SERIAL [PK]
-    managerFirstName : VARCHAR
-    managerLastName : VARCHAR
-    active_status : status_enum
-    LOB : lob_enum
-  }
-
-  entity "language" {
-    language_id : SERIAL [PK]
-    lang_name : VARCHAR
-    active_status : status_enum
-    LOB : lob_enum
-  }
-
-  entity "staff" {
-    staff_id : SERIAL [PK]
-    racf : VARCHAR
-    first_name : VARCHAR
-    last_name : VARCHAR
-    team_id : INT [FK]
-    role_id : INT [FK]
-    manager_id : INT [FK]
-    LOB : lob_enum
-    active_status : status_enum
-  }
-
-  entity "staff_language" {
-    staff_id : INT [FK]
-    language_id : INT [FK]
-    active_status : status_enum
-  }
-
-  entity "staff_history" {
-    history_id : SERIAL [PK]
-    staff_id : INT [FK]
-    ...
-    change_type : VARCHAR
-    change_timestamp : TIMESTAMP
-  }
-
-  entity "staff_language_history" {
-    history_id : SERIAL [PK]
-    staff_id : INT [FK]
-    language_id : INT [FK]
-    ...
-    change_type : VARCHAR
-    change_timestamp : TIMESTAMP
-  }
-
-  entity "member" {
-    member_id : SERIAL [PK]
-    cipId : VARCHAR
-    first_name : VARCHAR
-    last_name : VARCHAR
-    active_status : status_enum
-  }
-
-  entity "member_language" {
-    member_id : INT [FK]
-    language_id : INT [FK]
-    updated_by_staff_id : INT [FK]
-    active_status : status_enum
-  }
-
-  entity "member_language_history" {
-    history_id : SERIAL [PK]
-    member_id : INT [FK]
-    language_id : INT [FK]
-    updated_by_staff_id : INT [FK]
-    ...
-    change_type : VARCHAR
-    change_timestamp : TIMESTAMP
-  }
-
-  staff "0..n" -- "1" team : has
-  staff "0..n" -- "1" role : has
-  staff "0..n" -- "1" manager : reports to
-
-  staff_language "0..n" -- "1" staff : links
-  staff_language "0..n" -- "1" language : speaks
-
-  staff_history "0..n" -- "1" staff : records change of
-  staff_language_history "0..n" -- "1" staff_language : records change of
-
-  member_language "0..n" -- "1" member : speaks
-  member_language "0..n" -- "1" language : spoken by
-  member_language "0..n" -- "1" staff : updated by
-  
-  member_language_history "0..n" -- "1" member_language : records change of
-
+    enum "lob_enum" {
+        Medicare
+        Commercial
+    }
 }
+
+entity "team" {
+    + team_id [PK]
+    ---
+    team_name
+    team_status: status_enum
+    lob: lob_enum
+}
+
+entity "role" {
+    + role_id [PK]
+    ---
+    role_name
+    role_status: status_enum
+    lob: lob_enum
+}
+
+entity "language" {
+    + language_id [PK]
+    ---
+    lang_name
+    lang_status: status_enum
+}
+
+entity "manager" {
+    + manager_id [PK]
+    ---
+    managerFirstName
+    managerLastName
+    manager_status: status_enum
+    lob: lob_enum
+}
+
+entity "staff" {
+    + staff_id [PK]
+    ---
+    racf
+    first_name
+    last_name
+    team_id [FK]
+    role_id [FK]
+    manager_id [FK]
+    active_status: status_enum
+    lob: lob_enum
+}
+
+entity "staff_history" {
+    + history_id [PK]
+    ---
+    staff_id [FK]
+    racf
+    first_name
+    last_name
+    team_id 
+    role_id 
+    manager_id 
+    active_status: status_enum
+    change_type
+    change_date
+    lob: lob_enum
+}
+
+entity "staff_language" {
+    + staff_language_id [PK]
+    ---
+    staff_id [FK]
+    language_id [FK]
+    active_status: status_enum
+}
+
+entity "staff_language_history" {
+    + history_id [PK]
+    ---
+    staff_language_id [FK]
+    staff_id 
+    language_id 
+    active_status: status_enum
+    change_type
+    change_date
+}
+
+entity "member" {
+    + member_id [PK]
+    ---
+    first_name
+    last_name
+    cipId
+}
+
+entity "member_language" {
+    + member_language_id [PK]
+    ---
+    member_id [FK]
+    language_id [FK]
+    updated_by_staff_id [FK]
+    active_status: status_enum
+}
+
+entity "member_language_history" {
+    + history_id [PK]
+    ---
+    member_language_id [FK]
+    member_id
+    language_id
+    updated_by_staff_id
+    active_status: status_enum
+    change_type
+    change_date
+}
+
+team ||--o{ staff: has
+role ||--o{ staff: has
+manager ||--o{ staff: has
+language ||--o{ staff_language: speaks
+staff ||--o{ staff_language: speaks
+staff ||--o{ member_language: updates
+language ||--o{ member_language: speaks
+member ||--o{ member_language: speaks
+staff_language ||--o{ staff_language_history: has
+member_language ||--o{ member_language_history: has
+staff ||--o{ staff_history: has
 
 @enduml
