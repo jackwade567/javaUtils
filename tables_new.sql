@@ -1,5 +1,5 @@
 CREATE TABLE dlcaret.cm_participant (
-    cm_participant_id BIGINT PRIMARY KEY,
+    cm_participant_id BIGSERIAL PRIMARY KEY,
     racf VARCHAR(255) NOT NULL,
     first_name VARCHAR(255) NOT NULL,
     last_name VARCHAR(255) NOT NULL,
@@ -16,7 +16,7 @@ CREATE TABLE dlcaret.cm_participant (
 );
 
 CREATE TABLE dlcaret.cm_participant_language (
-    cm_participant_language_id BIGINT PRIMARY KEY,
+    cm_participant_language_id BIGSERIAL PRIMARY KEY,
     cm_participant_id BIGINT REFERENCES dlcaret.cm_participant(cm_participant_id),
     language_id INT REFERENCES dlcaret.cm_language(language_id),
     active_status status_enum NOT NULL DEFAULT 'Active',
@@ -29,7 +29,7 @@ CREATE TABLE dlcaret.cm_participant_language (
 );
 
 CREATE TABLE dlcaret.encounter_participant (
-    encounter_participant_id BIGINT PRIMARY KEY,
+    encounter_participant_id BIGSERIAL PRIMARY KEY,
     cipId VARCHAR(255) NOT NULL UNIQUE,
     first_name VARCHAR(255),
     last_name VARCHAR(255),
@@ -42,7 +42,7 @@ CREATE TABLE dlcaret.encounter_participant (
 );
 
 CREATE TABLE dlcaret.encounter_participant_language (
-    encounter_participant_language_id BIGINT PRIMARY KEY,
+    encounter_participant_language_id BIGSERIAL PRIMARY KEY,
     encounter_participant_id BIGINT REFERENCES dlcaret.encounter_participant(encounter_participant_id),
     language_id INT REFERENCES dlcaret.cm_language(language_id),
     updated_by_cm_participant_id BIGINT REFERENCES dlcaret.cm_participant(cm_participant_id), 
@@ -56,7 +56,7 @@ CREATE TABLE dlcaret.encounter_participant_language (
 );
 
 CREATE TABLE dlcaret.cm_participant_history (
-    history_id BIGINT PRIMARY KEY,
+    history_id BIGSERIAL PRIMARY KEY,
     cm_participant_id BIGINT NOT NULL,
     racf VARCHAR(255),
     first_name VARCHAR(255),
@@ -75,7 +75,7 @@ CREATE TABLE dlcaret.cm_participant_history (
 );
 
 CREATE TABLE dlcaret.cm_participant_language_history (
-    history_id BIGINT PRIMARY KEY,
+    history_id BIGSERIAL PRIMARY KEY,
     cm_participant_language_id BIGINT,
     cm_participant_id BIGINT,
     language_id INT,
@@ -89,7 +89,7 @@ CREATE TABLE dlcaret.cm_participant_language_history (
 );
 
 CREATE TABLE dlcaret.encounter_participant_language_history (
-    history_id BIGINT PRIMARY KEY,
+    history_id BIGSERIAL PRIMARY KEY,
     encounter_participant_language_id BIGINT,
     encounter_participant_id BIGINT,
     language_id INT,
