@@ -47,17 +47,15 @@ public class BatchInsert {
         }
     }
 
- private static String processLine(String line) {
-        boolean insideQuotes = false;
+   private static String processLine(String line) {
         StringBuilder processed = new StringBuilder();
+        char[] chars = line.toCharArray();
 
-        for (char c : line.toCharArray()) {
-            if (c == '\'') {
-                insideQuotes = !insideQuotes;
-            }
-            
-            if (insideQuotes && c == '\'') {
+        for (int i = 0; i < chars.length; i++) {
+            char c = chars[i];
+            if (c == '\'' && i + 1 < chars.length && chars[i + 1] == '\'') {
                 processed.append("''");
+                i++;  // Skip next quote
             } else {
                 processed.append(c);
             }
