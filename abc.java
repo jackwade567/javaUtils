@@ -12,7 +12,7 @@ public class BatchInsert {
     private static final String DB_URL = "jdbc:postgresql://your_host:your_port/your_db";
     private static final String DB_USER = "your_user";
     private static final String DB_PASS = "your_password";
-    private static final int BATCH_SIZE = 1000; // Number of rows per batch, you can adjust this as needed
+    private static final int BATCH_SIZE = 1000; // Number of rows per batch, adjust as needed
 
     public static void main(String[] args) {
         String inputFile = "path_to_your_file.txt";
@@ -25,7 +25,8 @@ public class BatchInsert {
 
             String line;
             while ((line = br.readLine()) != null) {
-                values.add(line.trim());
+                // We remove the leading comma
+                values.add(line.trim().substring(1));
 
                 if (values.size() >= BATCH_SIZE) {
                     insertBatch(insertBase, values, connection);
