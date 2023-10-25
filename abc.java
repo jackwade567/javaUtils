@@ -6,6 +6,8 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class BatchInsert {
 
@@ -47,21 +49,20 @@ public class BatchInsert {
         }
     }
 
-   private static String processLine(String line) {
-        StringBuilder processed = new StringBuilder();
-        char[] chars = line.toCharArray();
+  private static String processLine(String line) {
+    Pattern pattern = Pattern.compile("\\b\\w+'\\w+\\b");
+    Matcher matcher = pattern.matcher(line);
 
-        for (int i = 0; i < chars.length; i++) {
-            char c = chars[i];
-            if (c == '\'' && i + 1 < chars.length && chars[i + 1] == '\'') {
-                processed.append("''");
-                i++;  // Skip next quote
-            } else {
-                processed.append(c);
-            }
-        }
-        return processed.toString();
+    StringBuffer sb = new StringBuffer();
+    while (matcher.find()) {
+        String replacement = matcher.group().replace("'", "''");
+        matcher.appendReplacement(sb, replacement);
     }
+    matcher.appendTail(sb);
+
+    return sb.toString();
+}
+
 
 
     private static void insertBatch(String baseQuery, List<String> values, Connection connection) throws SQLException {
