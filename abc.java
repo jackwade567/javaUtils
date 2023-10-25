@@ -25,8 +25,8 @@ public class BatchInsert {
 
             String line;
             while ((line = br.readLine()) != null) {
-                // We remove the leading comma
-                String processedLine = line.trim().substring(1).replace("'", "''");
+                // Process the line to handle the single quotes properly
+                String processedLine = processLine(line.trim().substring(1));
                 values.add(processedLine);
 
                 if (values.size() >= BATCH_SIZE) {
@@ -45,6 +45,25 @@ public class BatchInsert {
             System.out.println("Stopping execution due to exception.");
             return;
         }
+    }
+
+    private static String processLine(String line) {
+        StringBuilder sb = new StringBuilder();
+        boolean insideQuotes = false;
+
+        for (char c : line.toCharArray()) {
+            if (c == '\'') {
+                insideQuotes = !insideQuotes;
+            }
+
+            if (c == '\'' && insideQuotes) {
+                sb.append("''");
+            } else {
+                sb.append(c);
+            }
+        }
+
+        return sb.toString();
     }
 
     private static void insertBatch(String baseQuery, List<String> values, Connection connection) throws SQLException {
