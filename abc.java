@@ -26,7 +26,8 @@ public class BatchInsert {
             String line;
             while ((line = br.readLine()) != null) {
                 // We remove the leading comma
-                values.add(line.trim().substring(1));
+                String processedLine = line.trim().substring(1).replace("'", "''");
+                values.add(processedLine);
 
                 if (values.size() >= BATCH_SIZE) {
                     insertBatch(insertBase, values, connection);
@@ -41,6 +42,8 @@ public class BatchInsert {
 
         } catch (Exception e) {
             e.printStackTrace();
+            System.out.println("Stopping execution due to exception.");
+            return;
         }
     }
 
@@ -48,6 +51,9 @@ public class BatchInsert {
         String query = baseQuery + String.join(", ", values);
         try (Statement stmt = connection.createStatement()) {
             stmt.execute(query);
+        } catch (SQLException e) {
+            System.out.println("SQL Exception encountered. Query: " + query);
+            throw e;  // This will propagate the exception to the main method which will handle and stop the execution
         }
     }
 }
