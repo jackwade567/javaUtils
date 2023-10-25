@@ -1,0 +1,167 @@
+@startuml
+
+package "ccn_staff" {
+
+    entity "staff" {
+        + staff_id : BIGINT [PK]
+        ---
+        racf : VARCHAR(30) 
+        first_name : VARCHAR(100)
+        last_name : VARCHAR(100)
+        team_id : BIGINT [FK]
+        role_id : BIGINT [FK]
+        manager_id : BIGINT [FK]
+        lob : lob_enum
+        active_status : status_enum
+        system_id : VARCHAR(30)
+        create_user_id : VARCHAR(30)
+        created_date_time : TIMESTAMP
+        last_update_user_id : VARCHAR(30)
+        last_update_date_time : TIMESTAMP
+    }
+
+    entity "staff_history" {
+        + staff_history_id : BIGINT [PK]
+        ---
+        staff_id : BIGINT
+        racf : VARCHAR(30)
+        first_name : VARCHAR(100)
+        last_name : VARCHAR(100)
+        team_id : BIGINT
+        role_id : BIGINT
+        manager_id : BIGINT
+        lob : lob_enum
+        active_status : status_enum
+        system_id : VARCHAR(30)
+        create_user_id : VARCHAR(30)
+        created_date_time : TIMESTAMP
+        last_update_user_id : VARCHAR(30)
+        last_update_date_time : TIMESTAMP
+    }
+
+    entity "staff_language" {
+        + staff_language_id : BIGINT [PK]
+        ---
+        staff_id : BIGINT [FK]
+        language_id : INT [FK]
+        active_status : status_enum
+        system_id : VARCHAR(30)
+        create_user_id : VARCHAR(30)
+        created_date_time : TIMESTAMP
+        last_update_user_id : VARCHAR(30)
+        last_update_date_time : TIMESTAMP
+    }
+
+    entity "staff_language_history" {
+        + staff_language_history_id : BIGINT [PK]
+        ---
+        staff_language_id : BIGINT
+        staff_id : BIGINT
+        language_id : INT
+        active_status : status_enum
+        system_id : VARCHAR(30)
+        create_user_id : VARCHAR(30)
+        created_date_time : TIMESTAMP
+        last_update_user_id : VARCHAR(30)
+        last_update_date_time : TIMESTAMP
+    }
+
+    entity "member_language" {
+        + member_language_id : BIGINT [PK]
+        ---
+        member_id : BIGINT [FK]
+        language_id : INT [FK]
+        updated_by_staff_id : BIGINT [FK]
+        system_id : VARCHAR(30)
+        create_user_id : VARCHAR(30)
+        created_date_time : TIMESTAMP
+        last_update_user_id : VARCHAR(30)
+        last_update_date_time : TIMESTAMP
+    }
+
+    entity "member_language_history" {
+        + member_language_history_id : BIGINT [PK]
+        ---
+        member_language_id : BIGINT
+        member_id : BIGINT
+        language_id : INT
+        updated_by_staff_id : BIGINT
+        system_id : VARCHAR(30)
+        create_user_id : VARCHAR(30)
+        created_date_time : TIMESTAMP
+        last_update_user_id : VARCHAR(30)
+        last_update_date_time : TIMESTAMP
+    }
+
+    entity "language" {
+        + language_id : INT [PK]
+        ---
+        lang_name : VARCHAR(100)
+        lang_status : status_enum
+        system_id : VARCHAR(30)
+        create_user_id : VARCHAR(30)
+        created_date_time : TIMESTAMP
+        last_update_user_id : VARCHAR(30)
+        last_update_date_time : TIMESTAMP
+    }
+
+    entity "role" {
+        + role_id : INT [PK]
+        ---
+        role_name : VARCHAR(100)
+        role_status : status_enum
+        system_id : VARCHAR(30)
+        create_user_id : VARCHAR(30)
+        created_date_time : TIMESTAMP
+        last_update_user_id : VARCHAR(30)
+        last_update_date_time : TIMESTAMP
+    }
+
+    entity "team" {
+        + team_id : INT [PK]
+        ---
+        team_name : VARCHAR(100)
+        team_status : status_enum
+        system_id : VARCHAR(30)
+        create_user_id : VARCHAR(30)
+        created_date_time : TIMESTAMP
+        last_update_user_id : VARCHAR(30)
+        last_update_date_time : TIMESTAMP
+    }
+
+    entity "manager" {
+        + manager_id : INT [PK]
+        ---
+        manager_first_name : VARCHAR(100)
+        manager_last_name : VARCHAR(100)
+        manager_status : status_enum
+        system_id : VARCHAR(30)
+        create_user_id : VARCHAR(30)
+        created_date_time : TIMESTAMP
+        last_update_user_id : VARCHAR(30)
+        last_update_date_time : TIMESTAMP
+    }
+
+    enum "lob_enum" {
+        Medicare
+        Commercial
+    }
+
+    enum "status_enum" {
+        Active
+        Inactive
+    }
+
+    staff --> role : is of
+    staff --> team : belongs to
+    staff --> manager : reports to
+    staff_language --> staff : references
+    staff_language --> language : knows
+    staff_history --> staff : history of
+    staff_language_history --> staff_language : history of
+    member_language --> language : speaks
+    member_language_history --> member_language : history of
+
+}
+
+@enduml
