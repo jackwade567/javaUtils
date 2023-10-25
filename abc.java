@@ -47,24 +47,26 @@ public class BatchInsert {
         }
     }
 
-    private static String processLine(String line) {
-        StringBuilder sb = new StringBuilder();
-        boolean insideQuotes = false;
+  private static String processLine(String line) {
+    StringBuilder sb = new StringBuilder();
+    boolean insideQuotes = false;
 
-        for (char c : line.toCharArray()) {
-            if (c == '\'') {
-                insideQuotes = !insideQuotes;
-            }
-
-            if (c == '\'' && insideQuotes) {
-                sb.append("''");
+    for (char c : line.toCharArray()) {
+        if (c == '\'') {
+            if (insideQuotes) {
+                sb.append("''"); // Append two quotes when closing
             } else {
-                sb.append(c);
+                sb.append("'"); // Append a single quote when opening
             }
+            insideQuotes = !insideQuotes;
+        } else {
+            sb.append(c);
         }
-
-        return sb.toString();
     }
+
+    return sb.toString();
+}
+
 
     private static void insertBatch(String baseQuery, List<String> values, Connection connection) throws SQLException {
         String query = baseQuery + String.join(", ", values);
