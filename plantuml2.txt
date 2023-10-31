@@ -2,8 +2,8 @@
 
 package "ccn_staff" {
 
-    entity "staff" {
-        + staff_id : BIGINT [PK]
+    entity "cm_participant" {
+        + cm_participant_id : BIGINT [PK]
         ---
         racf : VARCHAR(30) 
         first_name : VARCHAR(100)
@@ -20,10 +20,10 @@ package "ccn_staff" {
         last_update_date_time : TIMESTAMP
     }
 
-    entity "staff_history" {
-        + staff_history_id : BIGINT [PK]
+    entity "cm_participant_history" {
+        + cm_participant_history_id : BIGINT [PK]
         ---
-        staff_id : BIGINT
+        cm_participant_id : BIGINT
         racf : VARCHAR(30)
         first_name : VARCHAR(100)
         last_name : VARCHAR(100)
@@ -39,10 +39,10 @@ package "ccn_staff" {
         last_update_date_time : TIMESTAMP
     }
 
-    entity "staff_language" {
-        + staff_language_id : BIGINT [PK]
+    entity "cm_participant_language" {
+        + cm_participant_language_id : BIGINT [PK]
         ---
-        staff_id : BIGINT [FK]
+        cm_participant_id : BIGINT [FK]
         language_id : INT [FK]
         active_status : status_enum
         system_id : VARCHAR(30)
@@ -52,11 +52,11 @@ package "ccn_staff" {
         last_update_date_time : TIMESTAMP
     }
 
-    entity "staff_language_history" {
-        + staff_language_history_id : BIGINT [PK]
+    entity "cm_participant_language_history" {
+        + cm_participant_language_history_id : BIGINT [PK]
         ---
-        staff_language_id : BIGINT
-        staff_id : BIGINT
+        cm_participant_language_id : BIGINT
+        cm_participant_id : BIGINT
         language_id : INT
         active_status : status_enum
         system_id : VARCHAR(30)
@@ -66,12 +66,12 @@ package "ccn_staff" {
         last_update_date_time : TIMESTAMP
     }
 
-    entity "member_language" {
-        + member_language_id : BIGINT [PK]
+    entity "encounter_participant_language" {
+        + encounter_participant_language_id : BIGINT [PK]
         ---
-        member_id : BIGINT [FK]
+        encounter_participant_id : BIGINT [FK]
         language_id : INT [FK]
-        updated_by_staff_id : BIGINT [FK]
+        updated_by_cm_participant_id : BIGINT [FK]
         system_id : VARCHAR(30)
         create_user_id : VARCHAR(30)
         created_date_time : TIMESTAMP
@@ -79,13 +79,13 @@ package "ccn_staff" {
         last_update_date_time : TIMESTAMP
     }
 
-    entity "member_language_history" {
-        + member_language_history_id : BIGINT [PK]
+    entity "encounter_participant_language_history" {
+        + encounter_participant_language_history_id : BIGINT [PK]
         ---
-        member_language_id : BIGINT
-        member_id : BIGINT
+        encounter_participant_language_id : BIGINT
+        encounter_participant_id : BIGINT
         language_id : INT
-        updated_by_staff_id : BIGINT
+        updated_by_cm_participant_id : BIGINT
         system_id : VARCHAR(30)
         create_user_id : VARCHAR(30)
         created_date_time : TIMESTAMP
@@ -152,15 +152,15 @@ package "ccn_staff" {
         Inactive
     }
 
-    staff --> role : is of
-    staff --> team : belongs to
-    staff --> manager : reports to
-    staff_language --> staff : references
-    staff_language --> language : knows
-    staff_history --> staff : history of
-    staff_language_history --> staff_language : history of
-    member_language --> language : speaks
-    member_language_history --> member_language : history of
+    cm_participant --> role : is of
+    cm_participant --> team : belongs to
+    cm_participant --> manager : reports to
+    cm_participant_language --> cm_participant : references
+    cm_participant_language --> language : knows
+    cm_participant_history --> cm_participant : history of
+    cm_participant_language_history --> cm_participant_language : history of
+    encounter_participant_language --> language : speaks
+    encounter_participant_language_history --> encounter_participant_language : history of
 
 }
 
