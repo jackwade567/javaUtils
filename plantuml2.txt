@@ -1,6 +1,6 @@
 @startuml
 
-package "ccn_staff" {
+package "CM_Staff" {
 
     entity "cm_participant" {
         + cm_participant_id : BIGINT [PK]
@@ -12,6 +12,20 @@ package "ccn_staff" {
         role_id : BIGINT [FK]
         manager_id : BIGINT [FK]
         lob : lob_enum
+        active_status : status_enum
+        system_id : VARCHAR(30)
+        create_user_id : VARCHAR(30)
+        created_date_time : TIMESTAMP
+        last_update_user_id : VARCHAR(30)
+        last_update_date_time : TIMESTAMP
+    }
+
+    entity "encounter_participant" {
+        + encounter_participant_id : BIGINT [PK]
+        ---
+        cipid : VARCHAR(30)
+        firstname : VARCHAR(100)
+        lastname : VARCHAR(100)
         active_status : status_enum
         system_id : VARCHAR(30)
         create_user_id : VARCHAR(30)
@@ -159,7 +173,8 @@ package "ccn_staff" {
     cm_participant_language --> language : knows
     cm_participant_history --> cm_participant : history of
     cm_participant_language_history --> cm_participant_language : history of
-    encounter_participant_language --> language : speaks
+    encounter_participant --> encounter_participant_language : speaks in *
+    encounter_participant_language --> language : references
     encounter_participant_language_history --> encounter_participant_language : history of
 
 }
