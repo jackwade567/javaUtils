@@ -19,3 +19,16 @@ CREATE OR REPLACE VIEW dlcaret.cm_staff_lang_view
      LEFT JOIN dlcaret.role t3 ON t1.role_id = t3.role_id
      LEFT JOIN dlcaret.manager t4 ON t1.manager_id = t4.manager_id
   WHERE t1.active_status = 'Active'::status_enum AND t1.lob <> 'Medicare'::lob_enum;
+
+SELECT T1.FIRST_NAME AS "Member_First_Name",
+	T1.LAST_NAME AS "Member_Last_Name",
+	T1.CIPID AS "Member_CIP_ID",
+	T1.encounter_participant_party_id AS "Menber_Party_Id",
+	T4.RACF AS "Created_By_RACF",
+	T2.CREATED_DATE_TIME AS "Created_Date_Time",
+	T3.LANG_NAME AS "Spoken_Language"
+FROM CCN_STAFF.ENCOUNTER_PARTICIPANT T1
+LEFT JOIN CCN_STAFF.ENCOUNTER_PARTICIPANT_LANGUAGE T2 ON T1.ENCOUNTER_PARTICIPANT_ID = T2.ENCOUNTER_PARTICIPANT_ID
+LEFT JOIN CCN_STAFF.LANGUAGE T3 ON T3.LANGUAGE_ID = T2.LANGUAGE_ID
+Left JOIN CCN_STAFF.CM_PARTICIPANT T4 ON T4.CM_PARTICIPANT_ID = T2.UPDATED_BY_CM_PARTICIPANT_ID
+WHERE T1.ACTIVE_STATUS = 'Active'::STATUS_ENUM;
