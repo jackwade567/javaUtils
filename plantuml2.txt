@@ -1,6 +1,6 @@
 @startuml
 
-package "CM_Staff" {
+package "cm_staff" {
 
     entity "cm_participant" {
         + cm_participant_id : BIGINT [PK]
@@ -13,6 +13,7 @@ package "CM_Staff" {
         manager_id : BIGINT [FK]
         lob : lob_enum
         active_status : status_enum
+        ad_role: VARCHAR(20)
         system_id : VARCHAR(30)
         create_user_id : VARCHAR(30)
         created_date_time : TIMESTAMP
@@ -24,6 +25,7 @@ package "CM_Staff" {
         + encounter_participant_id : BIGINT [PK]
         ---
         cipid : VARCHAR(30)
+        encounter_participant_party_id: BIGINT
         firstname : VARCHAR(100)
         lastname : VARCHAR(100)
         active_status : status_enum
@@ -46,6 +48,7 @@ package "CM_Staff" {
         manager_id : BIGINT
         lob : lob_enum
         active_status : status_enum
+        change_type : VARCHAR(10)
         system_id : VARCHAR(30)
         create_user_id : VARCHAR(30)
         created_date_time : TIMESTAMP
@@ -59,6 +62,7 @@ package "CM_Staff" {
         cm_participant_id : BIGINT [FK]
         language_id : INT [FK]
         active_status : status_enum
+        transaction_id : uuid
         system_id : VARCHAR(30)
         create_user_id : VARCHAR(30)
         created_date_time : TIMESTAMP
@@ -73,6 +77,8 @@ package "CM_Staff" {
         cm_participant_id : BIGINT
         language_id : INT
         active_status : status_enum
+        transaction_id : uuid
+        change_type : VARCHAR(10)
         system_id : VARCHAR(30)
         create_user_id : VARCHAR(30)
         created_date_time : TIMESTAMP
@@ -86,12 +92,77 @@ package "CM_Staff" {
         encounter_participant_id : BIGINT [FK]
         language_id : INT [FK]
         updated_by_cm_participant_id : BIGINT [FK]
+        transaction_id : uuid
         system_id : VARCHAR(30)
         create_user_id : VARCHAR(30)
         created_date_time : TIMESTAMP
         last_update_user_id : VARCHAR(30)
         last_update_date_time : TIMESTAMP
     }
+    
+
+
+entity "encounter_participant_race" {
+    + encounter_participant_race_id : BIGINT [PK]
+    ---
+    encounter_participant_id : BIGINT [FK]
+    race_id : INT [FK]
+    updated_by_cm_participant_id : BIGINT [FK]
+    transaction_id : uuid
+    system_id : VARCHAR(30)
+    create_user_id : VARCHAR(30)
+    created_date_time : TIMESTAMP
+    last_update_user_id : VARCHAR(30)
+    last_update_date_time : TIMESTAMP
+}
+
+entity "encounter_participant_race_history" {
+    + encounter_participant_race_history_id : BIGINT [PK]
+    ---
+    *encounter_participant_race_id : BIGINT [FK]
+    encounter_participant_id : BIGINT
+    race_id : INT
+    updated_by_cm_participant_id : BIGINT
+    transaction_id : uuid
+    change_type : VARCHAR(10)
+    system_id : VARCHAR(30)
+    create_user_id : VARCHAR(30)
+    created_date_time : TIMESTAMP
+    last_update_user_id : VARCHAR(30)
+    last_update_date_time : TIMESTAMP
+}
+
+
+entity "encounter_participant_ethnicity" {
+    + encounter_participant_ethnicity_id : BIGINT [PK]
+    ---
+    encounter_participant_id : BIGINT [FK]
+    ethnicity_id : INT [FK]
+    updated_by_cm_participant_id : BIGINT [FK]
+    transaction_id : uuid
+    system_id : VARCHAR(30)
+    create_user_id : VARCHAR(30)
+    created_date_time : TIMESTAMP
+    last_update_user_id : VARCHAR(30)
+    last_update_date_time : TIMESTAMP
+}
+
+entity "encounter_participant_ethnicity_history" {
+    + encounter_participant_ethnicity_history_id : BIGINT [PK]
+    ---
+    *encounter_participant_ethnicity_id : BIGINT [FK]
+    encounter_participant_id : BIGINT
+    ethnicity_id : INT
+    updated_by_cm_participant_id : BIGINT
+    transaction_id : uuid
+    change_type : VARCHAR(10)
+    system_id : VARCHAR(30)
+    create_user_id : VARCHAR(30)
+    created_date_time : TIMESTAMP
+    last_update_user_id : VARCHAR(30)
+    last_update_date_time : TIMESTAMP
+}
+
 
     entity "encounter_participant_language_history" {
         + encounter_participant_language_history_id : BIGINT [PK]
@@ -100,6 +171,8 @@ package "CM_Staff" {
         encounter_participant_id : BIGINT
         language_id : INT
         updated_by_cm_participant_id : BIGINT
+        transaction_id : uuid
+        change_type : VARCHAR(10)
         system_id : VARCHAR(30)
         create_user_id : VARCHAR(30)
         created_date_time : TIMESTAMP
@@ -107,17 +180,44 @@ package "CM_Staff" {
         last_update_date_time : TIMESTAMP
     }
 
-    entity "language" {
-        + language_id : INT [PK]
-        ---
-        lang_name : VARCHAR(100)
-        lang_status : status_enum
-        system_id : VARCHAR(30)
-        create_user_id : VARCHAR(30)
-        created_date_time : TIMESTAMP
-        last_update_user_id : VARCHAR(30)
-        last_update_date_time : TIMESTAMP
-    }
+ entity "language" {
+    + language_id : INT [PK]
+    ---
+    lang_name : VARCHAR(100)
+    lang_status : status_enum
+    system_id : VARCHAR(30)
+    create_user_id : VARCHAR(30)
+    created_date_time : TIMESTAMP
+    last_update_user_id : VARCHAR(30)
+    last_update_date_time : TIMESTAMP
+    codeset : VARCHAR(50) DEFAULT 'CCN_SYSTEM'
+    * (lang_name, codeset) : UNIQUE
+}
+
+entity "RACE" {
+    + race_id : INT [PK]
+    ---
+    race_name : VARCHAR(100)
+    codeset : VARCHAR(50) DEFAULT 'CCN_SYSTEM'
+    create_user_id : VARCHAR(30)
+    created_date_time : TIMESTAMP
+    last_update_user_id : VARCHAR(30)
+    last_update_date_time : TIMESTAMP
+    * (race_name, codeset) : UNIQUE
+}
+
+entity "ETHNICITY" {
+    + ethnicity_id : INT [PK]
+    ---
+    ethnicity_name : VARCHAR(100)
+    codeset : VARCHAR(50) DEFAULT 'CCN_SYSTEM'
+    create_user_id : VARCHAR(30)
+    created_date_time : TIMESTAMP
+    last_update_user_id : VARCHAR(30)
+    last_update_date_time : TIMESTAMP
+    * (ethnicity_name, codeset) : UNIQUE
+}
+
 
     entity "role" {
         + role_id : INT [PK]
@@ -155,6 +255,7 @@ package "CM_Staff" {
         last_update_user_id : VARCHAR(30)
         last_update_date_time : TIMESTAMP
     }
+    
 
     enum "lob_enum" {
         Medicare
@@ -176,6 +277,14 @@ package "CM_Staff" {
     encounter_participant --> encounter_participant_language : speaks in *
     encounter_participant_language --> language : references
     encounter_participant_language_history --> encounter_participant_language : history of
+    
+encounter_participant_race --> encounter_participant : references
+encounter_participant_race --> RACE : identifies as during encounter
+encounter_participant_race_history ---> encounter_participant_race : history of
+
+encounter_participant_ethnicity --> encounter_participant : references
+encounter_participant_ethnicity --> ETHNICITY : identifies as during encounter
+encounter_participant_ethnicity_history ---> encounter_participant_ethnicity : history of
 
 }
 
