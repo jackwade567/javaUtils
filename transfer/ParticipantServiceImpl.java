@@ -20,20 +20,24 @@ import com.bcbsfl.ccn.cmparticipant.dto.CustomParticipantDto;
 import com.bcbsfl.ccn.cmparticipant.dto.ParticipantDto;
 import com.bcbsfl.ccn.cmparticipant.dto.ParticipantSearchCriteria;
 import com.bcbsfl.ccn.cmparticipant.dto.Lang;
+import com.bcbsfl.ccn.cmparticipant.entites.Ethnicity;
 import com.bcbsfl.ccn.cmparticipant.entites.Language;
 import com.bcbsfl.ccn.cmparticipant.entites.Manager;
 import com.bcbsfl.ccn.cmparticipant.entites.Participant;
 import com.bcbsfl.ccn.cmparticipant.entites.Participant.lob_enum;
 import com.bcbsfl.ccn.cmparticipant.entites.Participant.status_enum;
 import com.bcbsfl.ccn.cmparticipant.entites.PartipantLanguage;
+import com.bcbsfl.ccn.cmparticipant.entites.Race;
 import com.bcbsfl.ccn.cmparticipant.entites.Role;
 import com.bcbsfl.ccn.cmparticipant.entites.Team;
 import com.bcbsfl.ccn.cmparticipant.exception.ApiErrorResponse;
 import com.bcbsfl.ccn.cmparticipant.exception.ServiceErrorException;
+import com.bcbsfl.ccn.cmparticipant.repositories.EthnicityRepository;
 import com.bcbsfl.ccn.cmparticipant.repositories.LanguageRepository;
 import com.bcbsfl.ccn.cmparticipant.repositories.ManagerRepository;
 import com.bcbsfl.ccn.cmparticipant.repositories.ParticipantLanguageRepository;
 import com.bcbsfl.ccn.cmparticipant.repositories.ParticipantRepository;
+import com.bcbsfl.ccn.cmparticipant.repositories.RaceRepository;
 import com.bcbsfl.ccn.cmparticipant.repositories.RoleRepository;
 import com.bcbsfl.ccn.cmparticipant.repositories.TeamRepository;
 import com.bcbsfl.ccn.cmparticipant.services.ParticipantService;
@@ -55,6 +59,12 @@ public class ParticipantServiceImpl implements ParticipantService {
 
 	@Autowired
 	private TeamRepository teamRepository;
+	
+	@Autowired
+	private EthnicityRepository ethnicityRepository;
+	
+	@Autowired
+	private RaceRepository raceRepository;
 
 	@Override
 	public Map<String, Object> getAllData() {
@@ -76,12 +86,24 @@ public class ParticipantServiceImpl implements ParticipantService {
 		if (teamData.isEmpty()) {
 		    throw new ServiceErrorException(new ApiErrorResponse("409", "teamData doesn't exist"), HttpStatus.CONFLICT);
 		}
+		
+		List<Ethnicity> ethnicities = ethnicityRepository.findAll();
+		if (ethnicities.isEmpty()) {
+			throw new ServiceErrorException(new ApiErrorResponse("409", "ethnicity doesn't exist"),
+					HttpStatus.CONFLICT);
+		}
+		List<Race> races = raceRepository.findAll();
+		if (races.isEmpty()) {
+			throw new ServiceErrorException(new ApiErrorResponse("409", "race doesn't exist"), HttpStatus.CONFLICT);
+		}
 
 		Map<String, Object> combinedData = new HashMap<>();
 		combinedData.put("languages", languageData);
 		combinedData.put("manager", managerData);
 		combinedData.put("roles", roleData);
 		combinedData.put("teams", teamData);
+		combinedData.put("ethnicities", ethnicities);
+		combinedData.put("races", races);
 		return combinedData;
 
 	}
@@ -229,7 +251,7 @@ public class ParticipantServiceImpl implements ParticipantService {
 				return !isMatchLob(participantDto.getRacf(), participantDto.getLob());
 				
 			} else {
-				throw new ServiceErrorException(new ApiErrorResponse("409", "lob should be commercial or medicare"),
+				throw new ServiceErrorException(new ApiErrorResponse("409", "lob should be Commercial or Medicare"),
 						HttpStatus.CONFLICT);
 			}
 
@@ -330,12 +352,12 @@ public class ParticipantServiceImpl implements ParticipantService {
 		}
 		if (!stringValidationInput(participantDto.getFirstName())) {
 			throw new ServiceErrorException(new ApiErrorResponse("409",
-					"Firstname doesnot contain any numbers and Special Character :" + participantDto.getFirstName()),
+					"Firstname should not contain any numbers and Special Character :" + participantDto.getFirstName()),
 					HttpStatus.CONFLICT);
 		}
 		if (!stringValidationInput(participantDto.getLastName())) {
 			throw new ServiceErrorException(new ApiErrorResponse("409",
-					"LastName doesnot contain any numbers and Special Character :" + participantDto.getLastName()),
+					"LastName should not contain any numbers and Special Character :" + participantDto.getLastName()),
 					HttpStatus.CONFLICT);
 		}
 		return true;
@@ -386,6 +408,7 @@ public class ParticipantServiceImpl implements ParticipantService {
 		partcipant.setRacf(participantDto.getRacf());
 		partcipant.setFirstName(participantDto.getFirstName());
 		partcipant.setLastName(participantDto.getLastName());
+		partcipant.setLob(lob_enum.valueOf(participantDto.getLob()));
 		if (participantDto.getActiveStatus().equals("Inactive") || participantDto.getActiveStatus().equals("Active")) {
 			partcipant.setActiveStatus(status_enum.valueOf(participantDto.getActiveStatus()));
 		} else {
@@ -419,7 +442,7 @@ public class ParticipantServiceImpl implements ParticipantService {
 					new ApiErrorResponse("404", "with the Manager_Id, Manager entity is not available"),
 					HttpStatus.NOT_FOUND);
 		}
-		if (participantDto.getLanguagesId().contains(0)) {
+		if (participantDto.getLanguagesId()!= null && participantDto.getLanguagesId().contains(0)) {
 			throw new ServiceErrorException(
 					new ApiErrorResponse("404",
 							"Language id should not be 0, Please enter valid languageId, participant is not saved "),
