@@ -21,7 +21,6 @@ import com.bcbsfl.ccn.cmparticipant.dto.CustomParticipantDto;
 import com.bcbsfl.ccn.cmparticipant.dto.ParticipantDetailsDto;
 import com.bcbsfl.ccn.cmparticipant.dto.ParticipantDto;
 import com.bcbsfl.ccn.cmparticipant.entites.Participant;
-import com.bcbsfl.ccn.cmparticipant.entites.PartipantLanguage;
 import com.bcbsfl.ccn.cmparticipant.exception.ApiErrorResponse;
 import com.bcbsfl.ccn.cmparticipant.exception.ServiceErrorException;
 import com.bcbsfl.ccn.cmparticipant.serviceimpl.ParticipantDetails;
@@ -42,34 +41,27 @@ public class ParticipantController {
 		return ResponseEntity.ok(participantServiceImpl.getAllData());
 	}
 
-	@PostMapping("CCNCONFIGS/addParticipant")
+	@PostMapping("CCNCONFIGS/participants")
 	public ResponseEntity<Participant> addParticipant(@Valid @RequestBody ParticipantDto participantDto) {
 		if (participantDto != null) {
 			Participant participant = participantServiceImpl.addParticipant(participantDto);
-			List<PartipantLanguage> languages = participantServiceImpl.addlanguages(participant.getCmParticipantId(),
-					participantDto.getLanguagesId());
-			// if (languages.size() == participantDto.getLanguagesId().size()) {
 			return new ResponseEntity<>(participant, HttpStatus.CREATED);
-			// }
-//			throw new ServiceErrorException(
-//					new ApiErrorResponse("404", "StaffLanguage save operation failed but participant is saved"),
-//					HttpStatus.BAD_REQUEST);
 		}
 		throw new ServiceErrorException(new ApiErrorResponse("404", "StaffRequest is null"), HttpStatus.BAD_REQUEST);
 	}
 
-	@PutMapping("CCNCONFIGS/updateParticipant/{cm_participant_id}")
-	public ResponseEntity<Participant> updateParticipant(@PathVariable Long cm_participant_id,
+	@PutMapping("CCNCONFIGS/participants/{participantid}")
+	public ResponseEntity<Participant> updateParticipant(@PathVariable Long participantid,
 			@Valid @RequestBody ParticipantDto participantDto) {
-		if (cm_participant_id != null && participantDto != null) {
-			Participant updatedPartcipant = participantServiceImpl.updateParticipant(cm_participant_id, participantDto);
+		if (participantid != null && participantDto != null) {
+			Participant updatedPartcipant = participantServiceImpl.updateParticipant(participantid, participantDto);
 			return new ResponseEntity<>(updatedPartcipant, HttpStatus.OK);
 		}
 		throw new ServiceErrorException(new ApiErrorResponse("404", "StaffRequest is null"), HttpStatus.BAD_REQUEST);
 
 	}
 
-	@GetMapping("CCNCONFIGS/fetchAllData")
+	@GetMapping("CCNCONFIGS/fetchallparticipants")
 	public ResponseEntity<List<CustomParticipantDto>> fetchAllData(
 			@RequestParam(required = false) String teamNameFilter,
 			@RequestParam(required = false) String roleNameFilter,
@@ -86,21 +78,19 @@ public class ParticipantController {
 
 	}
 
-	@GetMapping("CCNCONFIGS/getParticipant")
+	@GetMapping("CCNCONFIGS/participant")
 	public ResponseEntity<List<ParticipantDetailsDto>> getParticipantData(
-			@RequestParam(required = false) String racfName, @RequestParam(required = false) Integer pageSize,
+			@RequestParam(required = false) String racf, @RequestParam(required = false) Integer pageSize,
 			@RequestParam(required = false) Integer pageNumber) {
 		List<ParticipantDetailsDto> customParticipantDto = null;
-		if(racfName != null && racfName.length() > 0) {
-		 customParticipantDto = participantDetails.getCustomParticipantDto(racfName,
+		if(racf != null && racf.length() > 0) {
+		 customParticipantDto = participantDetails.getCustomParticipantDto(racf,
 					null, null);
 		} else {
-		 customParticipantDto = participantDetails.getCustomParticipantDto(racfName,
+		 customParticipantDto = participantDetails.getCustomParticipantDto(racf,
 				 pageSize, pageNumber);
 		}
-		
 		return new ResponseEntity<>(customParticipantDto, HttpStatus.OK);
-
 	}
 
 //	@DeleteMapping("/{cm_participant_id}")

@@ -3,6 +3,7 @@ package com.bcbsfl.ccn.cmparticipant.exception;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -49,11 +50,11 @@ public class GlobalExceptionHandler {
 		return new ResponseEntity<>(apiErrorResponse, HttpStatus.BAD_REQUEST);
 	}
 
-//	@ExceptionHandler(HttpMessageNotReadableException.class)
-//	public ResponseEntity<Object> handleTypeMismatchException(HttpMessageNotReadableException ex) {
-//		String errorMessage = "Invalid input data type";
-//		return new ResponseEntity<>(errorMessage, HttpStatus.BAD_REQUEST);
-//	}
+	@ExceptionHandler(DataIntegrityViolationException.class)
+	public ResponseEntity<Object> handleDAOException(DataIntegrityViolationException ex) {
+		ApiErrorResponse apiErrorResponse = new ApiErrorResponse("601", ex.getMessage());
+		return new ResponseEntity<>(apiErrorResponse, HttpStatus.BAD_REQUEST);
+	}
 
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
 	@ExceptionHandler(MethodArgumentNotValidException.class)

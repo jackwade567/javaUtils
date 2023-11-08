@@ -7,8 +7,6 @@ import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class ParticipantDto {
@@ -42,7 +40,7 @@ public class ParticipantDto {
 	private int managerId;
 
 //	@Size(min = 1, message = "At least one languagesId required")
-	@JsonProperty("languagesId")
+	@JsonProperty("language")
 	private List<Integer> languagesId = new ArrayList<>();
 
 	@NotNull(message = "lob cannot be null")
@@ -55,7 +53,7 @@ public class ParticipantDto {
 	@JsonProperty("activeStatus")
 	private String activeStatus;
 
-	@JsonProperty("language")
+	@JsonProperty("otherLanguage")
 	private String language;
 
 	public String getLanguage() {
@@ -136,34 +134,6 @@ public class ParticipantDto {
 
 	public void setActiveStatus(String activeStatus) {
 		this.activeStatus = activeStatus;
-	}
-
-	public ParticipantDto(
-			@NotBlank(message = "racf cannot be empty") @NotNull(message = "racf cannot be null") String racf,
-			@NotBlank(message = "firstName cannot be empty") @NotNull(message = "firstName cannot be null") @NotEmpty(message = "firstName cannot be empty!") String firstName,
-			@NotBlank(message = "lastName cannot be empty") @NotNull(message = "lastName cannot be null") String lastName,
-			@Min(value = 1, message = "team Id should not be null") int teamId,
-			@Min(value = 1, message = "roleId should not be null") int roleId,
-			@Min(value = 1, message = "managerId should not be null") int managerId,
-			@Size(min = 1, message = "At least one languagesId required") List<Integer> languagesId,
-			@NotNull(message = "lob cannot be null") String lob,
-			@NotBlank(message = "activeStatus cannot be empty") @NotNull(message = "activeStatus cannot be null") String activeStatus,
-			String language) {
-		super();
-		this.racf = racf;
-		this.firstName = firstName;
-		this.lastName = lastName;
-		this.teamId = teamId;
-		this.roleId = roleId;
-		this.managerId = managerId;
-		this.languagesId = languagesId;
-		this.lob = lob;
-		this.activeStatus = activeStatus;
-		this.language = language;
-	}
-
-	public ParticipantDto() {
-		super();
 	}
 
 	@Override

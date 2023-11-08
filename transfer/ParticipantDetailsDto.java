@@ -38,21 +38,16 @@ public class ParticipantDetailsDto {
 	private String updatedAt;
 
 	@JsonProperty("team")
-	private String teamName;
+	private TeamDto team;
 
 	@JsonProperty("role")
-	private String roleName;
+	private RoleDto role;
 
-	@JsonProperty("manager_first_name")
-	private String managerFName;
-
-	@JsonProperty("manager_last_name")
-	private String managerLName;
+	@JsonProperty("manager")
+	private ManagerDto manager;
 
 	@JsonProperty("languages")
-	private List<String> languages;
-
-
+	private List<Lang> languages;
 
 	public BigInteger getCmParticipantId() {
 		return cmParticipantId;
@@ -134,54 +129,45 @@ public class ParticipantDetailsDto {
 		this.updatedAt = updatedAt;
 	}
 
-	
-	public String getTeamName() {
-		return teamName;
-	}
-
-	public void setTeamName(String teamName) {
-		this.teamName = teamName;
-	}
-
-	public String getRoleName() {
-		return roleName;
-	}
-
-	public void setRoleName(String roleName) {
-		this.roleName = roleName;
-	}
-
-	public String getManagerFName() {
-		return managerFName;
-	}
-
-	public void setManagerFName(String managerFName) {
-		this.managerFName = managerFName;
-	}
-
-	public String getManagerLName() {
-		return managerLName;
-	}
-
-	public void setManagerLName(String managerLName) {
-		this.managerLName = managerLName;
-	}
-
-	public List<String> getLanguages() {
+	public List<Lang> getLanguages() {
 		return languages;
 	}
 
-	public void setLanguages(List<String> languages) {
+	public void setLanguages(List<Lang> languages) {
 		this.languages = languages;
+	}
+
+	public TeamDto getTeam() {
+		return team;
+	}
+
+	public void setTeam(TeamDto team) {
+		this.team = team;
+	}
+
+	public RoleDto getRole() {
+		return role;
+	}
+
+	public void setRole(RoleDto role) {
+		this.role = role;
+	}
+
+	public ManagerDto getManager() {
+		return manager;
+	}
+
+	public void setManager(ManagerDto manager) {
+		this.manager = manager;
 	}
 
 	@Override
 	public String toString() {
-		return "ParticipantDetailsDto [cm_participant_id=" + cmParticipantId + ", racf=" + racf + ", lob=" + lob
+		return "ParticipantDetailsDto [cmParticipantId=" + cmParticipantId + ", racf=" + racf + ", lob=" + lob
 				+ ", firstName=" + firstName + ", lastName=" + lastName + ", adRole=" + adRole + ", addedByRacf="
 				+ addedByRacf + ", updatedByRacf=" + updatedByRacf + ", createdAt=" + createdAt + ", updatedAt="
-				+ updatedAt + ", team_name=" + teamName + ", role_name=" + roleName + ", manager_FName="
-				+ managerFName + ", manager_LName=" + managerLName + ", languages=" + languages + "]";
+				+ updatedAt + ", team=" + team + ", role=" + role + ", manager=" + manager + ", languages=" + languages
+				+ "]";
 	}
 
 }

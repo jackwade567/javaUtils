@@ -10,6 +10,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import javax.transaction.Transactional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -85,6 +87,7 @@ public class ParticipantServiceImpl implements ParticipantService {
 	}
 
 	@Override
+	@Transactional
 	public Participant addParticipant(ParticipantDto participantDto) {
 		if (uniqueConstraintsCheck(participantDto)) {
 			if (languageNameAndIdvalidation(participantDto)) {
@@ -128,9 +131,9 @@ public class ParticipantServiceImpl implements ParticipantService {
 								"Language id should not be 0, Please enter valid languageId, participant is not saved "),
 								HttpStatus.NOT_FOUND);
 					}
-
-					participantRepository.save(partcipant);
-
+					Participant savedParticipant = participantRepository.save(partcipant);
+					Long participantId = savedParticipant.getCmParticipantId();
+					List<PartipantLanguage> partipantLanguages = addlanguages(participantId, participantDto.getLanguagesId());
 					return partcipant;
 				} else {
 					throw new ServiceErrorException(
@@ -164,19 +167,19 @@ public class ParticipantServiceImpl implements ParticipantService {
 		throw new ServiceErrorException(new ApiErrorResponse("409", "No data Available"), HttpStatus.NOT_FOUND);
 	}
 
-	private List<CustomParticipantDto> mapDto(List<Object[]> tuple) {
+	private List<CustomParticipantDto> mapDto(List<Object[]> objects) {
 		List<CustomParticipantDto> customParticipantDtos = new ArrayList<>();
-		tuple.forEach(data -> {
+		objects.forEach(data -> {
 			CustomParticipantDto customParticipantDto = new CustomParticipantDto();
-			customParticipantDto.setCmParticipantId((BigInteger) data[0]);
-			customParticipantDto.setRacf((String) data[1]);
-			customParticipantDto.setLob((String) data[2]);
-			customParticipantDto.setFirstName((String) data[3]);
-			customParticipantDto.setLastName((String) data[4]);
-			customParticipantDto.setTeamName((String) data[5]);
-			customParticipantDto.setRoleName((String) data[6]);
-			customParticipantDto.setManagerFirstName((String) data[7]);
-			customParticipantDto.setManagerLastName((String) data[8]);
+			customParticipantDto.setCmParticipantId(castToBigInteger(data,0));
+			customParticipantDto.setRacf(castToString(data,1));
+			customParticipantDto.setLob(castToString(data,2));
+			customParticipantDto.setFirstName(castToString(data,3));
+			customParticipantDto.setLastName(castToString(data,4));
+			customParticipantDto.setTeamName(castToString(data,5));
+			customParticipantDto.setRoleName(castToString(data,6));
+			customParticipantDto.setManagerFirstName(castToString(data,7));
+			customParticipantDto.setManagerLastName(castToString(data,8));
 			if ((String) data[9] != null) {
 				customParticipantDto.setLanguages(extractLanguages(data[9].toString()));
 			} else {
@@ -187,9 +190,20 @@ public class ParticipantServiceImpl implements ParticipantService {
 		return customParticipantDtos;
 	}
 
-	private static List<Lang> extractLanguages(String input) {
+	public static String castToString(Object[] data, int i) {
+		if((String) data[i] != null ) {
+			return (String) data[i];
+		}
+		return null;
+	}
+	public static BigInteger castToBigInteger(Object[] data, int i) {
+		if((BigInteger) data[i] != null ) {
+			return (BigInteger) data[i];
+		}
+		return null;
+	}
+	public static List<Lang> extractLanguages(String input) {
 		List<Lang> languageList = new ArrayList<>();
-		// Use a regex pattern to extract language and id
 		if (input != null) {
 			String[] split = input.split("<-->");
 			for (String string : split) {
@@ -286,13 +300,25 @@ public class ParticipantServiceImpl implements ParticipantService {
 			if (stringValidation(participantDto.getLanguage())) {
 				Integer languageId = languageRepository.getLanguageNameByID(participantDto.getLanguage());
 				if (languageId != null) {
-					participantDto.getLanguagesId().add(languageId);
+					if((participantDto.getLanguagesId() != null && !participantDto.getLanguagesId().isEmpty())) {
+						participantDto.getLanguagesId().add(languageId);
+					} else {
+						List<Integer> addLanguage =  new ArrayList<>();
+						addLanguage.add(languageId);
+						participantDto.setLanguagesId(addLanguage);
+					}
 				} else {
 					Language language = new Language();
 					language.setLanguageName(participantDto.getLanguage());
 					language.setLanguageStatus(language.getLanguageStatus());
 					Language savedlanguage = languageRepository.save(language);
-					participantDto.getLanguagesId().add(savedlanguage.getLanguageId());
+					if((participantDto.getLanguagesId() != null && !participantDto.getLanguagesId().isEmpty())) {
+						participantDto.getLanguagesId().add(savedlanguage.getLanguageId());
+					} else {
+						List<Integer> addLanguage =  new ArrayList<>();
+						addLanguage.add(savedlanguage.getLanguageId());
+						participantDto.setLanguagesId(addLanguage);
+					}
 				}
 			} else {
 				throw new ServiceErrorException(
@@ -315,13 +341,13 @@ public class ParticipantServiceImpl implements ParticipantService {
 		return true;
 	}
 
-	private boolean stringValidation(String language) {
+	public static boolean stringValidation(String language) {
 		Pattern pattern = Pattern.compile("^[a-zA-Z]+$");
 		Matcher matcher = pattern.matcher(language);
 		return matcher.matches();
 	}
 
-	private boolean stringValidationInput(String input) {
+	public static boolean stringValidationInput(String input) {
 		Pattern pattern = Pattern.compile("^[a-zA-Z ]+$");
 		Matcher matcher = pattern.matcher(input);
 		return matcher.matches();
@@ -353,18 +379,13 @@ public class ParticipantServiceImpl implements ParticipantService {
 				HttpStatus.NOT_FOUND);
 	}
 
+	@Transactional
 	private Participant updateParticipantEntity(Long cmParticipantId, ParticipantDto participantDto,
 			Participant partcipant) {
 		partcipant.setCmParticipantId(cmParticipantId);
 		partcipant.setRacf(participantDto.getRacf());
 		partcipant.setFirstName(participantDto.getFirstName());
 		partcipant.setLastName(participantDto.getLastName());
-//		if (participantDto.getLob().equals("Commercial") || participantDto.getLob().equals("Medicare")) {
-//			partcipant.setLob(lob_enum.valueOf(participantDto.getLob()));
-//		} else {
-//			throw new ServiceErrorException(new ApiErrorResponse("409", "lob should be Commercial or Medicare"),
-//					HttpStatus.CONFLICT);
-//		}
 		if (participantDto.getActiveStatus().equals("Inactive") || participantDto.getActiveStatus().equals("Active")) {
 			partcipant.setActiveStatus(status_enum.valueOf(participantDto.getActiveStatus()));
 		} else {
@@ -426,7 +447,6 @@ public class ParticipantServiceImpl implements ParticipantService {
 						participantLanguage.setLanguageId(languageId);
 						participantLanguage.setUuid(participantLanguage.getUuid());
 						participantLanguages.add(participantLanguage);
-					
 				} else {
 					throw new ServiceErrorException(
 							new ApiErrorResponse("404", "Language _id " + languageId + " is not found"),

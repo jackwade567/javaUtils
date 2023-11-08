@@ -20,9 +20,6 @@ public class PartipantLanguage {
 	@Column(name = "cm_participant_language_id", nullable = false, unique = true)
 	private int cmParticipantLanguageId;
 
-//	@GeneratedValue(generator = "uuid")
-//	@GenericGenerator(name = "uuid2", strategy = "org.hibernate.id.UUIDGenerator")
-//	@Type(type = "org.hibernate.type.PostgresUUIDType")
 	@Column(name = "transaction_id", nullable = false, unique = true)
 	private UUID uuid = UUID.randomUUID();
 
@@ -33,12 +30,12 @@ public class PartipantLanguage {
 	private int languageId;
 
 	public enum ActiveStatus {
-		ACTIVE, INACTIVE
+		Active, Inactive
 	}
 
 	@Enumerated(EnumType.STRING)
 	@Column(name = "active_status")
-	private ActiveStatus status = ActiveStatus.ACTIVE;
+	private ActiveStatus status = ActiveStatus.Active;
 
 	public ActiveStatus getActiveStatus() {
 		return status;
@@ -47,7 +44,6 @@ public class PartipantLanguage {
 	public void setActiveStatus(ActiveStatus status) {
 		this.status = status;
 	}
-
 
 	public int getCmParticipantLanguageId() {
 		return cmParticipantLanguageId;
@@ -73,14 +69,13 @@ public class PartipantLanguage {
 		this.languageId = languageId;
 	}
 
-	
-//	public ActiveStatus getStatus() {
-//		return status;
-//	}
-//
-//	public void setStatus(ActiveStatus status) {
-//		this.status = status;
-//	}
+	public ActiveStatus getStatus() {
+		return status;
+	}
+
+	public void setStatus(ActiveStatus status) {
+		this.status = status;
+	}
 
 	public UUID getUuid() {
 		return uuid;
@@ -93,8 +88,7 @@ public class PartipantLanguage {
 	@Override
 	public String toString() {
 		return "PartipantLanguage [cm_participant_language_id=" + cmParticipantLanguageId + ", uuid=" + uuid
-				+ ", cm_participant_id=" + cmParticipantId + ", language_id=" + languageId + ", status=" + status
-				+ "]";
+				+ ", cm_participant_id=" + cmParticipantId + ", language_id=" + languageId + ", status=" + status + "]";
 	}
 
 }

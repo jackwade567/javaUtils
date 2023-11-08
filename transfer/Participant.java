@@ -9,12 +9,6 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
-//@NamedNativeQuery(name = "getCustomParticipantDto", query = "select t1.cm_participant_id as id,t1.racf as racf,t1.lob as lob,t1.firstName as fName,t1.lastName as lName,t2.teamName as teamName,t3.roleName as roleName,t4.manager_firstname as manFName,t4.manager_lastname as manLName from Participant t1 join Team t2 on t1.team_id = t2.team_id join Role t3 on t1.role_id = t3.role_id join Manager t4 on t1.manager_id = t4.manager_id where t1.cm_participant_id :cm_participant_id", resultSetMapping = "Mapping.CustomParticipantDto")
-//@SqlResultSetMapping(name = "Mapping.CustomParticipantDto", classes = @ConstructorResult(targetClass = CustomParticipantDto.class, columns = { @ColumnResult(name = "id"), @ColumnResult(name = "racf"),@ColumnResult(name = "lob"),@ColumnResult(name = "fName"),@ColumnResult(name = "lName"),@ColumnResult(name = "teamName"),@ColumnResult(name = "roleName"),@ColumnResult(name = "manFName"),@ColumnResult(name = "manLName")}) )
-
-//@NamedNativeQuery(name = "getTwoField", query = "select t1.cm_participant_id as id,t1.racf as racf from Participant t1 where t1.cm_participant_id :cm_participant_id", resultSetMapping = "Mapping.TwoFieldDto")
-//@SqlResultSetMapping(name = "Mapping.TwoFieldDto", classes = @ConstructorResult(targetClass = TwoFieldDto.class, columns = { @ColumnResult(name = "id",type = long.class), @ColumnResult(name = "racf",type = String.class)}) )
-
 @Entity
 @Table(name = "cm_participant")
 public class Participant {
@@ -59,8 +53,6 @@ public class Participant {
 		Medicare, Commercial
 
 	}
-
-
 
 	public Long getCmParticipantId() {
 		return cmParticipantId;
@@ -137,8 +129,8 @@ public class Participant {
 	@Override
 	public String toString() {
 		return "Participant [cm_participant_id=" + cmParticipantId + ", racf=" + racf + ", firstName=" + firstName
-				+ ", lastName=" + lastName + ", team_id=" + teamId + ", role_id=" + roleId + ", manager_id="
-				+ managerId + ", lob=" + lob + ", activeStatus=" + activeStatus + "]";
+				+ ", lastName=" + lastName + ", team_id=" + teamId + ", role_id=" + roleId + ", manager_id=" + managerId
+				+ ", lob=" + lob + ", activeStatus=" + activeStatus + "]";
 	}
 
 }

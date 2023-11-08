@@ -117,26 +117,6 @@ public class CustomParticipantDto {
 		this.managerLastName = managerLastName;
 	}
 
-	public CustomParticipantDto() {
-		super();
-	}
-
-	public CustomParticipantDto(BigInteger cmPariticipantId, String racf, String lob, String firstName, String lastName,
-			String teamName, String roleName, String managerFirstName, String managerLastName,
-			List<Lang> languages) {
-		super();
-		this.cmParticipantId = cmPariticipantId;
-		this.racf = racf;
-		this.lob = lob;
-		this.firstName = firstName;
-		this.lastName = lastName;
-		this.teamName = teamName;
-		this.roleName = roleName;
-		this.managerFirstName = managerFirstName;
-		this.managerLastName = managerLastName;
-		this.languages = languages;
-	}
-
 	@Override
 	public String toString() {
 		return "CustomParticipantDto [cm_participant_id=" + cmParticipantId + ", racf=" + racf + ", lob=" + lob
