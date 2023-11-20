@@ -18,8 +18,8 @@ public interface EncounterParticipantRaceRepo extends JpaRepository<EncounterPar
 	
 	Optional<List<EncounterParticipantRace>> findByEncounterParticipantId(long encounterParticipantId);
 	
-	@Query("select updatedByCmParticipantId from EncounterParticipantRace t where t.encounterParticipantId = ?1")
-	List<Long> getUpdatedByStaffId(long encounterParticipantId);
+	@Query("select raceId from EncounterParticipantRace t where t.encounterParticipantId = ?1")
+	List<Integer> getDbEncounterParticipantId(Long encounterParticipantId);
 	
 	@Query("Select t from EncounterParticipantRace t where t.encounterParticipantId = ?1 and t.raceId = ?2")
 	EncounterParticipantRace findByRace_Id(long encounterParticipantId, Integer raceId);
@@ -35,6 +35,6 @@ public interface EncounterParticipantRaceRepo extends JpaRepository<EncounterPar
 	@Modifying
 	@Transactional
 	@Query("Delete from EncounterParticipantRace t where t.encounterParticipantId = ?1 and t.raceId in ?2")
-	void deleteByRaceList(long encounterParticipantId, List<Integer> deleteIds);
+	void deleteByRaceList(Long encounterParticipantId, List<Integer> deleteIds);
 	
 }

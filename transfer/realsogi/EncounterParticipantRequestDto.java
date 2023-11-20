@@ -25,8 +25,6 @@ public class EncounterParticipantRequestDto {
 	@JsonProperty("memberLastName")
 	private String memberLastName;
 
-	@NotBlank(message = "racf cannot be empty")
-	@NotNull(message = "racf cannot be null")
 	@JsonProperty("racf")
 	private String racf;
 
@@ -39,9 +37,8 @@ public class EncounterParticipantRequestDto {
 	@JsonProperty("activeStatus")
 	private String activeStatus;
 
-	@Min(value = 1, message = "updateByPartcipantId should not be empty or null or zero or negative")
-	@JsonProperty("updateByPartcipantId")
-	private long updateByPartcipantId;
+	@JsonProperty("updateByParticipantId")
+	private Long updateByPartcipantId;
 
 	@JsonProperty("raceId")
 	private List<Integer> raceId = new ArrayList<>();
@@ -112,11 +109,11 @@ public class EncounterParticipantRequestDto {
 		this.activeStatus = activeStatus;
 	}
 
-	public long getUpdateByPartcipantId() {
+	public Long getUpdateByPartcipantId() {
 		return updateByPartcipantId;
 	}
 
-	public void setUpdateByPartcipantId(long updateByPartcipantId) {
+	public void setUpdateByPartcipantId(Long updateByPartcipantId) {
 		this.updateByPartcipantId = updateByPartcipantId;
 	}
 

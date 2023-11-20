@@ -1,5 +1,6 @@
 package com.bcbsfl.ccn.realsogi.services;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -106,18 +107,18 @@ public class EncounterParticipantServiceImpl implements EncounterParticipantServ
 			throw new ServiceErrorException(new ApiErrorResponse("409", "activeStatus should be Active or Inactive"),
 					HttpStatus.CONFLICT);
 		}
-		if (!raceAndSpokenAndWrittenlangEmptyCheck(encounterParticipantRequestDto)) {
-			throw new ServiceErrorException(new ApiErrorResponse("404", "Empty Field violation"), HttpStatus.NOT_FOUND);
-		}
-		if (encounterParticipantRequestDto.getEthnicityId() == null
-				|| encounterParticipantRequestDto.getEthnicityId() <= 0) {
-			logger.info(
-					"realsogi/encounterparticipant endpoint service addEncounterParticipant() --> EthnicityId should not be null or zero or negative!");
-			throw new ServiceErrorException(
-					new ApiErrorResponse("404", "EthnicityId should not be null or zero or negative!"),
-					HttpStatus.NOT_FOUND);
-		}
-		if (!cmParticipantId(encounterParticipantRequestDto)) {
+//		if (!raceAndSpokenAndWrittenlangEmptyCheck(encounterParticipantRequestDto)) {
+//			throw new ServiceErrorException(new ApiErrorResponse("404", "Empty Field violation"), HttpStatus.NOT_FOUND);
+//		}
+//		if (encounterParticipantRequestDto.getEthnicityId() == null
+//				|| encounterParticipantRequestDto.getEthnicityId() <= 0) {
+//			logger.info(
+//					"realsogi/encounterparticipant endpoint service addEncounterParticipant() --> EthnicityId should not be null or zero or negative!");
+//			throw new ServiceErrorException(
+//					new ApiErrorResponse("404", "EthnicityId should not be null or zero or negative!"),
+//					HttpStatus.NOT_FOUND);
+//		}
+		if (!checkCmParticipantId(encounterParticipantRequestDto)) {
 			throw new ServiceErrorException(new ApiErrorResponse("409", "cmParticipantId Check failed"),
 					HttpStatus.CONFLICT);
 		}
@@ -141,6 +142,8 @@ public class EncounterParticipantServiceImpl implements EncounterParticipantServ
 		encounterParticipant.setLastName(encounterParticipantRequestDto.getMemberLastName());
 		encounterParticipant.setEncounterParticipantPartyId(encounterParticipantRequestDto.getMemberPartyId());
 		encounterParticipant.setActiveStatus(encounterParticipant.getActiveStatus());
+		encounterParticipant.setCreateDateTime(LocalDateTime.now());
+		encounterParticipant.setUpdateDateTime(LocalDateTime.now());
 		EncounterParticipant savedEncounterParticipant = encounterParticipantRepository.save(encounterParticipant);
 		Long encounterParticipantId = savedEncounterParticipant.getEncounterParticipantId();
 		addlanguages(encounterParticipantId, encounterParticipantRequestDto.getUpdateByPartcipantId(),
@@ -155,8 +158,11 @@ public class EncounterParticipantServiceImpl implements EncounterParticipantServ
 		return savedEncounterParticipant;
 	}
 
-	private List<EncounterParticipantRace> addRace(Long encounterParticipantId, long updateByPartcipantId,
+	private void addRace(Long encounterParticipantId, Long updateByPartcipantId,
 			List<Integer> raceIds) {
+		if (raceIds == null || raceIds.isEmpty()) {
+			return;
+		}
 		List<EncounterParticipantRace> encounterParticipantRaces = new ArrayList<>();
 		if (encounterParticipantId != null && encounterParticipantId != 0) {
 			if (raceIds != null && !raceIds.isEmpty()) {
@@ -165,7 +171,9 @@ public class EncounterParticipantServiceImpl implements EncounterParticipantServ
 					EncounterParticipantRace encounterParticipantRace = new EncounterParticipantRace();
 					encounterParticipantRace.setEncounterParticipantId(encounterParticipantId);
 					encounterParticipantRace.setRaceId(raceId);
-					encounterParticipantRace.setUpdatedByCmParticipantId(updateByPartcipantId);
+					encounterParticipantRace.setCreateDateTime(LocalDateTime.now());
+					encounterParticipantRace.setUpdateDateTime(LocalDateTime.now());
+					encounterParticipantRace.setUpdatedByCmParticipantId(updateByPartcipantId != null ? updateByPartcipantId : null);
 					encounterParticipantRace.setUuid(encounterParticipantRace.getUuid());
 					encounterParticipantRaceRepo.save(encounterParticipantRace);
 					encounterParticipantRaces.add(encounterParticipantRace);
@@ -182,15 +190,19 @@ public class EncounterParticipantServiceImpl implements EncounterParticipantServ
 					new ApiErrorResponse("404", "EncounterParticipant entity doesn't exist " + encounterParticipantId),
 					HttpStatus.NOT_FOUND);
 		}
-		return encounterParticipantRaces;
 	}
 
-	private void addEthnicity(Long encounterParticipantId, long updateByPartcipantId, int ethnicityId) {
+	private void addEthnicity(Long encounterParticipantId, Long updateByPartcipantId, Integer ethnicityId) {
+		if (ethnicityId == null) {
+			return;
+		}
 		logger.info("Entering --> realsogi/encounterparticipant endpoint service addEthnicity()");
 		EncounterParticipantEthnicity encounterParticipantEthnicity = new EncounterParticipantEthnicity();
 		encounterParticipantEthnicity.setEncounterParticipantId(encounterParticipantId);
 		encounterParticipantEthnicity.setEthnicityId(ethnicityId);
-		encounterParticipantEthnicity.setUpdatedByCmParticipantId(updateByPartcipantId);
+		encounterParticipantEthnicity.setCreateDateTime(LocalDateTime.now());
+		encounterParticipantEthnicity.setUpdateDateTime(LocalDateTime.now());
+	    encounterParticipantEthnicity.setUpdatedByCmParticipantId(updateByPartcipantId != null ? updateByPartcipantId : null);
 		encounterParticipantEthnicity.setUuid(encounterParticipantEthnicity.getUuid());
 		encounterParticipantEthnicityRepo.save(encounterParticipantEthnicity);
 		logger.info("Exiting --> realsogi/encounterparticipant endpoint service addEthnicity()");
@@ -202,13 +214,21 @@ public class EncounterParticipantServiceImpl implements EncounterParticipantServ
 		return matcher.matches();
 	}
 
-	private boolean cmParticipantId(EncounterParticipantRequestDto encounterParticipantRequestDto) {
-		Optional<Participant> participantOptional = participantRepository
-				.findById(encounterParticipantRequestDto.getUpdateByPartcipantId());
-		if (!participantOptional.isPresent()) {
-			logger.info(
-					"realsogi/encounterparticipant endpoint service cmParticipantId() --> No record found for given Participant_id!");
-			throw new ServiceErrorException(new ApiErrorResponse("404", "No record found for given Participant_id!"),
+	private boolean checkCmParticipantId(EncounterParticipantRequestDto encounterParticipantRequestDto) {
+		if(encounterParticipantRequestDto.getUpdateByPartcipantId() != null && encounterParticipantRequestDto.getUpdateByPartcipantId() > 0) {
+			Optional<Participant> participantOptional = participantRepository
+					.findById(encounterParticipantRequestDto.getUpdateByPartcipantId());
+			if (!participantOptional.isPresent()) {
+				logger.info(
+						"realsogi/encounterparticipant endpoint service cmParticipantId() --> No record found for given Participant_id!");
+				throw new ServiceErrorException(new ApiErrorResponse("404", "No record found for given Participant_id!"),
+						HttpStatus.NOT_FOUND);
+			}
+		}
+		if (encounterParticipantRequestDto.getUpdateByPartcipantId() != null
+				&& encounterParticipantRequestDto.getUpdateByPartcipantId() <= 0) {
+			throw new ServiceErrorException(
+					new ApiErrorResponse("404", "updateByPartcipantId should not zero or negative!"),
 					HttpStatus.NOT_FOUND);
 		}
 		return true;
@@ -226,39 +246,37 @@ public class EncounterParticipantServiceImpl implements EncounterParticipantServ
 						HttpStatus.NOT_FOUND);
 			}
 		}
+		if (encounterParticipantRequestDto.getEthnicityId() != null
+				&& encounterParticipantRequestDto.getEthnicityId() <= 0) {
+			throw new ServiceErrorException(
+					new ApiErrorResponse("404", "EthnicityId should not zero or negative!"),
+					HttpStatus.NOT_FOUND);
+		}
 		return true;
 	}
 
 	private boolean raceAndSpokenAndWrittenlangEmptyCheck(
 			EncounterParticipantRequestDto encounterParticipantRequestDto) {
-		if ((encounterParticipantRequestDto.getRace() == null || encounterParticipantRequestDto.getRace().isBlank())
-				&& (encounterParticipantRequestDto.getRaceId() == null
-						|| encounterParticipantRequestDto.getRaceId().isEmpty())) {
-			logger.info(
-					"realsogi/encounterparticipant endpoint service raceAndSpokenAndWrittenlangEmptyCheck() --> Both otheRace and raceId are empty");
-			throw new ServiceErrorException(new ApiErrorResponse("409", "Both otheRace and raceId are empty"),
-					HttpStatus.CONFLICT);
-		}
-		if ((encounterParticipantRequestDto.getSpokenLanguages() == null
-				|| encounterParticipantRequestDto.getSpokenLanguages().isEmpty())
-				&& (encounterParticipantRequestDto.getOtherSpokenLang() == null
-						|| encounterParticipantRequestDto.getOtherSpokenLang().isBlank())) {
-			logger.info(
-					"realsogi/encounterparticipant endpoint service raceAndSpokenAndWrittenlangEmptyCheck() --> Both otherSpokenlanguage and Spokenlanguage are empty");
-			throw new ServiceErrorException(
-					new ApiErrorResponse("409", "Both otherSpokenlanguage and Spokenlanguage are empty"),
-					HttpStatus.CONFLICT);
-		}
-		if ((encounterParticipantRequestDto.getWrittenLanguages() == null
-				|| encounterParticipantRequestDto.getWrittenLanguages().isEmpty())
-				&& (encounterParticipantRequestDto.getOtherWrittenLang() == null
-						|| encounterParticipantRequestDto.getOtherWrittenLang().isBlank())) {
-			logger.info(
-					"realsogi/encounterparticipant endpoint service raceAndSpokenAndWrittenlangEmptyCheck() --> Both otherWrittenlanguage and Writtenlanguage are empty");
-			throw new ServiceErrorException(
-					new ApiErrorResponse("409", "Both otherWrittenlanguage and Writtenlanguage are empty"),
-					HttpStatus.CONFLICT);
-		}
+//		if ((encounterParticipantRequestDto.getSpokenLanguages() == null
+//				|| encounterParticipantRequestDto.getSpokenLanguages().isEmpty())
+//				&& (encounterParticipantRequestDto.getOtherSpokenLang() == null
+//						|| encounterParticipantRequestDto.getOtherSpokenLang().isBlank())) {
+//			logger.info(
+//					"realsogi/encounterparticipant endpoint service raceAndSpokenAndWrittenlangEmptyCheck() --> Both otherSpokenlanguage and Spokenlanguage are empty");
+//			throw new ServiceErrorException(
+//					new ApiErrorResponse("409", "Both otherSpokenlanguage and Spokenlanguage are empty"),
+//					HttpStatus.CONFLICT);
+//		}
+//		if ((encounterParticipantRequestDto.getWrittenLanguages() == null
+//				|| encounterParticipantRequestDto.getWrittenLanguages().isEmpty())
+//				&& (encounterParticipantRequestDto.getOtherWrittenLang() == null
+//						|| encounterParticipantRequestDto.getOtherWrittenLang().isBlank())) {
+//			logger.info(
+//					"realsogi/encounterparticipant endpoint service raceAndSpokenAndWrittenlangEmptyCheck() --> Both otherWrittenlanguage and Writtenlanguage are empty");
+//			throw new ServiceErrorException(
+//					new ApiErrorResponse("409", "Both otherWrittenlanguage and Writtenlanguage are empty"),
+//					HttpStatus.CONFLICT);
+//		}
 		return true;
 	}
 
@@ -488,8 +506,11 @@ public class EncounterParticipantServiceImpl implements EncounterParticipantServ
 		return true;
 	}
 
-	public List<EncounterParticipantLanguage> addlanguages(Long encounterParticipantId, Long updateByParticipantId,
+	public void addlanguages(Long encounterParticipantId, Long updateByParticipantId,
 			List<Integer> spokenlanguagesId) {
+		if (spokenlanguagesId == null || spokenlanguagesId.isEmpty()) {
+			return;
+		}
 		List<EncounterParticipantLanguage> encounterParticipantLanguages = new ArrayList<>();
 		if (encounterParticipantId != null && encounterParticipantId != 0) {
 			if (spokenlanguagesId != null && !spokenlanguagesId.isEmpty()) {
@@ -498,7 +519,9 @@ public class EncounterParticipantServiceImpl implements EncounterParticipantServ
 					EncounterParticipantLanguage encounterParticipantLanguage = new EncounterParticipantLanguage();
 					encounterParticipantLanguage.setEncounterParticipantId(encounterParticipantId);
 					encounterParticipantLanguage.setLanguageId(languadeId);
-					encounterParticipantLanguage.setCmParticipantId(updateByParticipantId);
+					encounterParticipantLanguage.setCreateDateTime(LocalDateTime.now());
+					encounterParticipantLanguage.setUpdateDateTime(LocalDateTime.now());
+					encounterParticipantLanguage.setCmParticipantId(updateByParticipantId != null ? updateByParticipantId : null);
 					encounterParticipantLanguage.setUuid(encounterParticipantLanguage.getUuid());
 					// encounterParticipantLanguage.setDateTime(LocalDateTime.now());
 					encounterParticipantLanguageRepo.save(encounterParticipantLanguage);
@@ -516,11 +539,13 @@ public class EncounterParticipantServiceImpl implements EncounterParticipantServ
 					new ApiErrorResponse("404", "EncounterParticipant entity doesn't exist " + encounterParticipantId),
 					HttpStatus.NOT_FOUND);
 		}
-		return encounterParticipantLanguages;
 	}
 
-	public List<EncounterParticipantWrittenLanguage> addWrittenLanguages(Long encounterParticipantId,
+	public void addWrittenLanguages(Long encounterParticipantId,
 			Long updateByParticipantId, List<Integer> writtenlanguagesId) {
+		if (writtenlanguagesId == null || writtenlanguagesId.isEmpty()) {
+			return;
+		}
 		List<EncounterParticipantWrittenLanguage> encounterParticipantLanguages = new ArrayList<>();
 		if (encounterParticipantId != null && encounterParticipantId != 0) {
 			if (writtenlanguagesId != null && !writtenlanguagesId.isEmpty()) {
@@ -529,7 +554,9 @@ public class EncounterParticipantServiceImpl implements EncounterParticipantServ
 					EncounterParticipantWrittenLanguage encounterParticipantLanguage = new EncounterParticipantWrittenLanguage();
 					encounterParticipantLanguage.setEncounterParticipantId(encounterParticipantId);
 					encounterParticipantLanguage.setLanguageId(languadeId);
-					encounterParticipantLanguage.setCmParticipantId(updateByParticipantId);
+					encounterParticipantLanguage.setCreateDateTime(LocalDateTime.now());
+					encounterParticipantLanguage.setUpdateDateTime(LocalDateTime.now());
+					encounterParticipantLanguage.setCmParticipantId(updateByParticipantId != null ? updateByParticipantId : null);
 					encounterParticipantLanguage.setUuid(encounterParticipantLanguage.getUuid());
 					encounterParticipantWrittenLanguageRepo.save(encounterParticipantLanguage);
 					encounterParticipantLanguages.add(encounterParticipantLanguage);
@@ -546,7 +573,6 @@ public class EncounterParticipantServiceImpl implements EncounterParticipantServ
 					new ApiErrorResponse("404", "EncounterParticipant entity doesn't exist " + encounterParticipantId),
 					HttpStatus.NOT_FOUND);
 		}
-		return encounterParticipantLanguages;
 	}
 
 	@Override
@@ -598,7 +624,7 @@ public class EncounterParticipantServiceImpl implements EncounterParticipantServ
 					RaceDto raceDto = new RaceDto();
 					raceDto.setId(raceObj.getRaceId());
 					raceDto.setValue(raceObj.getRaceName());
-					raceDto.setCreatedDateTime(race.getDateTime());
+					raceDto.setCreatedDateTime(race.getCreateDateTime());
 					raceDto.setSource(race.getSystemId());
 					String racf = participantRepository.findByCmParticipantId(race.getUpdatedByCmParticipantId());
 					raceDto.setCreatedByRacf(racf != null ? racf : null);
@@ -622,7 +648,7 @@ public class EncounterParticipantServiceImpl implements EncounterParticipantServ
 				EthnicityDto ethnicityDto = new EthnicityDto();
 				ethnicityDto.setId(ethnicity.getEthnicityId());
 				ethnicityDto.setValue(ethnicity.getEthnicityName());
-				ethnicityDto.setCreatedDateTime(encounterParticipantEthnicity.getDateTime());
+				ethnicityDto.setCreatedDateTime(encounterParticipantEthnicity.getCreateDateTime());
 				ethnicityDto.setSource(encounterParticipantEthnicity.getSystemId());
 				String racf = participantRepository
 						.findByCmParticipantId(encounterParticipantEthnicity.getUpdatedByCmParticipantId());
@@ -646,7 +672,7 @@ public class EncounterParticipantServiceImpl implements EncounterParticipantServ
 					MemberSpokenLanguageDto memberSpokenLanguageDto = new MemberSpokenLanguageDto();
 					memberSpokenLanguageDto.setId(languageSpoken.getLanguageId());
 					memberSpokenLanguageDto.setValue(languageSpoken.getLanguageName());
-					memberSpokenLanguageDto.setCreatedDateTime(language.getDateTime());
+					memberSpokenLanguageDto.setCreatedDateTime(language.getCreateDateTime());
 					memberSpokenLanguageDto.setSource(language.getSystemId());
 					String racf = participantRepository.findByCmParticipantId(language.getCmParticipantId());
 					memberSpokenLanguageDto.setCreatedByRacf(racf != null ? racf : null);
@@ -671,7 +697,7 @@ public class EncounterParticipantServiceImpl implements EncounterParticipantServ
 					MemberWrittenLanguageDto memberWrittenLanguageDto = new MemberWrittenLanguageDto();
 					memberWrittenLanguageDto.setId(languageSpoken.getLanguageId());
 					memberWrittenLanguageDto.setValue(languageSpoken.getLanguageName());
-					memberWrittenLanguageDto.setCreatedDateTime(language.getDateTime());
+					memberWrittenLanguageDto.setCreatedDateTime(language.getCreateDateTime());
 					memberWrittenLanguageDto.setSource(language.getSystemId());
 					String racf = participantRepository.findByCmParticipantId(language.getCmParticipantId());
 					memberWrittenLanguageDto.setCreatedByRacf(racf != null ? racf : null);
@@ -685,20 +711,20 @@ public class EncounterParticipantServiceImpl implements EncounterParticipantServ
 	// Update Member and Member_language
 	@Override
 	@Transactional
-	public EncounterParticipant updateEncounterParticipant(long encounter_participant_id,
+	public EncounterParticipant updateEncounterParticipant(String memberCipId,
 			EncounterParticipantRequestDto encounterParticipantRequestDto) {
 		logger.info("Entering --> realsogi/encounterparticipant endpoint service updateEncounterParticipant()");
 		Optional<EncounterParticipant> encounterOptional = encounterParticipantRepository
-				.findById(encounter_participant_id);
+				.findByCipId(memberCipId);
 		if (!encounterOptional.isPresent()) {
 			logger.info("realsogi/encounterparticipant endpoint service updateEncounterParticipant() --> No Content");
 			throw new ServiceErrorException(new ApiErrorResponse("204", "No Content"), HttpStatus.NO_CONTENT);
 		}
 		EncounterParticipant encounterParticipant = encounterOptional.get();
-		if (!encounterParticipant.getCipId().equals(encounterParticipantRequestDto.getMemberCipId())) {
+		if (!encounterParticipant.getCipId().equalsIgnoreCase(encounterParticipantRequestDto.getMemberCipId())) {
 			logger.info("realsogi/encounterparticipant endpoint service updateEncounterParticipant() --> No Content available for provided memberCipId "+ encounterParticipantRequestDto.getMemberCipId());
 			throw new ServiceErrorException(new ApiErrorResponse("409",
-					"No Content available for provided memberCipId " + encounterParticipantRequestDto.getMemberCipId()),
+					"No Content available for provided memberCipId " + memberCipId),
 					HttpStatus.CONFLICT);
 		}
 		if (!constraintsCheck(encounterParticipantRequestDto)) {
@@ -710,7 +736,7 @@ public class EncounterParticipantServiceImpl implements EncounterParticipantServ
 			throw new ServiceErrorException(new ApiErrorResponse("409", "activeStatus should be Active or Inactive"),
 					HttpStatus.CONFLICT);
 		}
-		if (!cmParticipantId(encounterParticipantRequestDto)) {
+		if (!checkCmParticipantId(encounterParticipantRequestDto)) {
 			throw new ServiceErrorException(new ApiErrorResponse("409", "cmParticipantId Check failed"),
 					HttpStatus.CONFLICT);
 		}
@@ -738,10 +764,11 @@ public class EncounterParticipantServiceImpl implements EncounterParticipantServ
 		encounterParticipant.setLastName(encounterParticipantRequestDto.getMemberLastName());
 		encounterParticipant.setEncounterParticipantPartyId(encounterParticipantRequestDto.getMemberPartyId());
 		encounterParticipant.setActiveStatus(encounterParticipant.getActiveStatus());
-		updateEthnicity(encounterParticipantRequestDto, encounter_participant_id);
-		updateRace(encounterParticipantRequestDto, encounter_participant_id);
-		updateSpokenLanguages(encounterParticipantRequestDto, encounter_participant_id);
-		updateWrittenLanguages(encounterParticipantRequestDto, encounter_participant_id);
+		encounterParticipant.setUpdateDateTime(LocalDateTime.now());
+		updateEthnicity(encounterParticipantRequestDto, encounterParticipant.getEncounterParticipantId());
+		updateRace(encounterParticipantRequestDto, encounterParticipant.getEncounterParticipantId());
+		updateSpokenLanguages(encounterParticipantRequestDto, encounterParticipant.getEncounterParticipantId());
+		updateWrittenLanguages(encounterParticipantRequestDto, encounterParticipant.getEncounterParticipantId());
 		logger.info("Exiting --> realsogi/encounterparticipant endpoint service updateEncounterParticipant()");
 		return encounterParticipant;
 	}
@@ -757,8 +784,18 @@ public class EncounterParticipantServiceImpl implements EncounterParticipantServ
 		if (encounPartiEtni.isPresent()) {
 			EncounterParticipantEthnicity encounterParticipantEthnicity = encounPartiEtni.get();
 			encounterParticipantEthnicity.setEthnicityId(encounterParticipantRequestDto.getEthnicityId());
+			encounterParticipantEthnicity.setUpdateDateTime(LocalDateTime.now());
 			encounterParticipantEthnicity
-					.setUpdatedByCmParticipantId(encounterParticipantRequestDto.getUpdateByPartcipantId());
+					.setUpdatedByCmParticipantId(encounterParticipantRequestDto.getUpdateByPartcipantId() != null ? encounterParticipantRequestDto.getUpdateByPartcipantId() : null);
+			encounterParticipantEthnicityRepo.save(encounterParticipantEthnicity);
+		} else {
+			EncounterParticipantEthnicity encounterParticipantEthnicity = new EncounterParticipantEthnicity();
+			encounterParticipantEthnicity.setEncounterParticipantId(encounter_participant_id);
+			encounterParticipantEthnicity.setCreateDateTime(LocalDateTime.now());
+			encounterParticipantEthnicity.setUpdateDateTime(LocalDateTime.now());
+			encounterParticipantEthnicity.setEthnicityId(encounterParticipantRequestDto.getEthnicityId());
+		    encounterParticipantEthnicity.setUpdatedByCmParticipantId(encounterParticipantRequestDto.getUpdateByPartcipantId() != null ? encounterParticipantRequestDto.getUpdateByPartcipantId() : null);
+			encounterParticipantEthnicity.setUuid(encounterParticipantEthnicity.getUuid());
 			encounterParticipantEthnicityRepo.save(encounterParticipantEthnicity);
 		}
 	}
@@ -770,54 +807,40 @@ public class EncounterParticipantServiceImpl implements EncounterParticipantServ
 						|| encounterParticipantRequestDto.getRaceId().isEmpty())) {
 			return;
 		}
-		List<Long> getUpdatedByParticipantId = encounterParticipantRaceRepo
-				.getUpdatedByStaffId(encounter_participant_id);
+		List<Integer> getDbRaceIds = encounterParticipantRaceRepo
+				.getDbEncounterParticipantId(encounter_participant_id);
 		List<EncounterParticipantRace> ePRaces = new ArrayList<>();
 		List<Integer> raceIds = encounterParticipantRequestDto.getRaceId().stream().distinct()
 				.collect(Collectors.toList());
 		for (Integer raceId : raceIds) {
 			EncounterParticipantRace races = encounterParticipantRaceRepo.findByRace_Id(encounter_participant_id,
 					raceId);
-			if (races == null
-					&& getUpdatedByParticipantId.contains(encounterParticipantRequestDto.getUpdateByPartcipantId())) {
+			if (races == null) {
 				EncounterParticipantRace encounterParticipantRace = new EncounterParticipantRace();
 				encounterParticipantRace.setEncounterParticipantId(encounter_participant_id);
 				encounterParticipantRace.setRaceId(raceId);
+				encounterParticipantRace.setCreateDateTime(LocalDateTime.now());
+				encounterParticipantRace.setUpdateDateTime(LocalDateTime.now());
 				encounterParticipantRace
-						.setUpdatedByCmParticipantId(encounterParticipantRequestDto.getUpdateByPartcipantId());
+						.setUpdatedByCmParticipantId(encounterParticipantRequestDto.getUpdateByPartcipantId() != null ? encounterParticipantRequestDto.getUpdateByPartcipantId() : null);
 				encounterParticipantRace.setUuid(encounterParticipantRace.getUuid());
 				// encounterParticipantRaceRepo.save(encounterParticipantRace);
 				ePRaces.add(encounterParticipantRace);
-			} else if (races == null
-					&& !getUpdatedByParticipantId.contains(encounterParticipantRequestDto.getUpdateByPartcipantId())) {
-				encounterParticipantRaceRepo.deleteByMemberandStaffId(encounter_participant_id,
-						getUpdatedByParticipantId);
-				EncounterParticipantRace encounterParticipantRace = new EncounterParticipantRace();
-				encounterParticipantRace.setEncounterParticipantId(encounter_participant_id);
-				encounterParticipantRace.setRaceId(raceId);
+			} else if (races != null) {
+				EncounterParticipantRace encounterParticipantRace = races;
+				//encounterParticipantRace.setEncounterParticipantId(encounter_participant_id);
+				//encounterParticipantRace.setRaceId(raceId);
+				encounterParticipantRace.setUpdateDateTime(LocalDateTime.now());
 				encounterParticipantRace
-						.setUpdatedByCmParticipantId(encounterParticipantRequestDto.getUpdateByPartcipantId());
-				encounterParticipantRace.setUuid(encounterParticipantRace.getUuid());
+						.setUpdatedByCmParticipantId(encounterParticipantRequestDto.getUpdateByPartcipantId() != null ? encounterParticipantRequestDto.getUpdateByPartcipantId() : null);
+				//encounterParticipantRace.setUuid(encounterParticipantRace.getUuid());
 				// encounterParticipantRaceRepo.save(encounterParticipantRace);
-				ePRaces.add(encounterParticipantRace);
-			} else if (races != null
-					&& !getUpdatedByParticipantId.contains(encounterParticipantRequestDto.getUpdateByPartcipantId())) {
-				encounterParticipantRaceRepo.deleteByMemberandStaffId(encounter_participant_id,
-						getUpdatedByParticipantId);
-				EncounterParticipantRace encounterParticipantRace = new EncounterParticipantRace();
-				encounterParticipantRace.setEncounterParticipantId(encounter_participant_id);
-				encounterParticipantRace.setRaceId(raceId);
-				encounterParticipantRace
-						.setUpdatedByCmParticipantId(encounterParticipantRequestDto.getUpdateByPartcipantId());
-				encounterParticipantRace.setUuid(encounterParticipantRace.getUuid());
-				// encounterParticipantRaceRepo.save(encounterParticipantRace);
+				getDbRaceIds.remove(raceId);
 				ePRaces.add(encounterParticipantRace);
 			}
 		}
 		encounterParticipantRaceRepo.saveAll(ePRaces);
-		List<Integer> dbRaceId = encounterParticipantRaceRepo.getRaceIds(encounter_participant_id);
-
-		deleteOldRacesById(dbRaceId, raceIds, encounter_participant_id);
+		deleteOldRacesById(getDbRaceIds, encounter_participant_id);
 	}
 
 	private void updateSpokenLanguages(EncounterParticipantRequestDto encounterParticipantRequestDto,
@@ -829,54 +852,38 @@ public class EncounterParticipantServiceImpl implements EncounterParticipantServ
 
 			return;
 		}
-		List<Long> getUpdatedByParticipantId = encounterParticipantLanguageRepo
-				.getUpdatedByStaffId(encounter_participant_id);
+		List<Integer> getDbLanguageIds = encounterParticipantLanguageRepo
+				.getlanguageIdId(encounter_participant_id);
 		List<EncounterParticipantLanguage> ePLanguages = new ArrayList<>();
 		List<Integer> languagesIds = encounterParticipantRequestDto.getSpokenLanguages().stream().distinct()
 				.collect(Collectors.toList());
 		for (Integer languageId : languagesIds) {
 			EncounterParticipantLanguage languages = encounterParticipantLanguageRepo
 					.findByLanguage_Id(encounter_participant_id, languageId);
-			if (languages == null
-					&& getUpdatedByParticipantId.contains(encounterParticipantRequestDto.getUpdateByPartcipantId())) {
+			if (languages == null) {
 				EncounterParticipantLanguage encounterParticipantLanguage = new EncounterParticipantLanguage();
 				encounterParticipantLanguage.setEncounterParticipantId(encounter_participant_id);
 				encounterParticipantLanguage.setLanguageId(languageId);
+				encounterParticipantLanguage.setCreateDateTime(LocalDateTime.now());
+				encounterParticipantLanguage.setUpdateDateTime(LocalDateTime.now());
 				encounterParticipantLanguage
-						.setCmParticipantId(encounterParticipantRequestDto.getUpdateByPartcipantId());
+						.setCmParticipantId(encounterParticipantRequestDto.getUpdateByPartcipantId() != null ? encounterParticipantRequestDto.getUpdateByPartcipantId() : null);
 				encounterParticipantLanguage.setUuid(encounterParticipantLanguage.getUuid());
-				encounterParticipantLanguageRepo.save(encounterParticipantLanguage);
 				ePLanguages.add(encounterParticipantLanguage);
-			} else if (languages == null
-					&& !getUpdatedByParticipantId.contains(encounterParticipantRequestDto.getUpdateByPartcipantId())) {
-				encounterParticipantLanguageRepo.deleteByMemberandStaffId(encounter_participant_id,
-						getUpdatedByParticipantId);
-				EncounterParticipantLanguage encounterParticipantLanguage = new EncounterParticipantLanguage();
-				encounterParticipantLanguage.setEncounterParticipantId(encounter_participant_id);
-				encounterParticipantLanguage.setLanguageId(languageId);
+			} else if (languages != null) {
+				EncounterParticipantLanguage encounterParticipantLanguage = languages;
+				//encounterParticipantLanguage.setEncounterParticipantId(encounter_participant_id);
+				//encounterParticipantLanguage.setLanguageId(languageId);
+				encounterParticipantLanguage.setUpdateDateTime(LocalDateTime.now());
 				encounterParticipantLanguage
-						.setCmParticipantId(encounterParticipantRequestDto.getUpdateByPartcipantId());
-				encounterParticipantLanguage.setUuid(encounterParticipantLanguage.getUuid());
-				encounterParticipantLanguageRepo.save(encounterParticipantLanguage);
-				ePLanguages.add(encounterParticipantLanguage);
-			} else if (languages != null
-					&& !getUpdatedByParticipantId.contains(encounterParticipantRequestDto.getUpdateByPartcipantId())) {
-				encounterParticipantLanguageRepo.deleteByMemberandStaffId(encounter_participant_id,
-						getUpdatedByParticipantId);
-				EncounterParticipantLanguage encounterParticipantLanguage = new EncounterParticipantLanguage();
-				encounterParticipantLanguage.setEncounterParticipantId(encounter_participant_id);
-				encounterParticipantLanguage.setLanguageId(languageId);
-				encounterParticipantLanguage
-						.setCmParticipantId(encounterParticipantRequestDto.getUpdateByPartcipantId());
-				encounterParticipantLanguage.setUuid(encounterParticipantLanguage.getUuid());
-				encounterParticipantLanguageRepo.save(encounterParticipantLanguage);
+						.setCmParticipantId(encounterParticipantRequestDto.getUpdateByPartcipantId() != null ? encounterParticipantRequestDto.getUpdateByPartcipantId() : null);
+				//encounterParticipantLanguage.setUuid(encounterParticipantLanguage.getUuid());
+				getDbLanguageIds.remove(languageId);
 				ePLanguages.add(encounterParticipantLanguage);
 			}
 		}
 		encounterParticipantLanguageRepo.saveAll(ePLanguages);
-		List<Integer> dbLanguagesId = encounterParticipantLanguageRepo.getLanguageIds(encounter_participant_id);
-
-		deleteOldlanguagesById(dbLanguagesId, languagesIds, encounter_participant_id);
+		deleteOldlanguagesById(getDbLanguageIds, encounter_participant_id);
 	}
 
 	private void updateWrittenLanguages(EncounterParticipantRequestDto encounterParticipantRequestDto,
@@ -888,85 +895,57 @@ public class EncounterParticipantServiceImpl implements EncounterParticipantServ
 
 			return;
 		}
-		List<Long> getUpdatedByParticipantId = encounterParticipantWrittenLanguageRepo
-				.getUpdatedByStaffId(encounter_participant_id);
+		List<Integer> getLanguageIds = encounterParticipantWrittenLanguageRepo
+				.getDblanguageId(encounter_participant_id);
 		List<EncounterParticipantWrittenLanguage> ePLanguages = new ArrayList<>();
 		List<Integer> languagesIds = encounterParticipantRequestDto.getWrittenLanguages().stream().distinct()
 				.collect(Collectors.toList());
 		for (Integer languageId : languagesIds) {
 			EncounterParticipantWrittenLanguage languages = encounterParticipantWrittenLanguageRepo
 					.findByLanguage_Id(encounter_participant_id, languageId);
-			if (languages == null
-					&& getUpdatedByParticipantId.contains(encounterParticipantRequestDto.getUpdateByPartcipantId())) {
+			if (languages == null) {
 				EncounterParticipantWrittenLanguage encounterParticipantLanguage = new EncounterParticipantWrittenLanguage();
 				encounterParticipantLanguage.setEncounterParticipantId(encounter_participant_id);
 				encounterParticipantLanguage.setLanguageId(languageId);
+				encounterParticipantLanguage.setCreateDateTime(LocalDateTime.now());
+				encounterParticipantLanguage.setUpdateDateTime(LocalDateTime.now());
 				encounterParticipantLanguage
 						.setCmParticipantId(encounterParticipantRequestDto.getUpdateByPartcipantId());
 				encounterParticipantLanguage.setUuid(encounterParticipantLanguage.getUuid());
-				encounterParticipantWrittenLanguageRepo.save(encounterParticipantLanguage);
 				ePLanguages.add(encounterParticipantLanguage);
-			} else if (languages == null
-					&& !getUpdatedByParticipantId.contains(encounterParticipantRequestDto.getUpdateByPartcipantId())) {
-				encounterParticipantWrittenLanguageRepo.deleteByMemberandStaffId(encounter_participant_id,
-						getUpdatedByParticipantId);
-				EncounterParticipantWrittenLanguage encounterParticipantLanguage = new EncounterParticipantWrittenLanguage();
-				encounterParticipantLanguage.setEncounterParticipantId(encounter_participant_id);
-				encounterParticipantLanguage.setLanguageId(languageId);
+			} else if (languages != null) {
+				EncounterParticipantWrittenLanguage encounterParticipantLanguage = languages;
+				//encounterParticipantLanguage.setEncounterParticipantId(encounter_participant_id);
+				//encounterParticipantLanguage.setLanguageId(languageId);
+				encounterParticipantLanguage.setUpdateDateTime(LocalDateTime.now());
 				encounterParticipantLanguage
 						.setCmParticipantId(encounterParticipantRequestDto.getUpdateByPartcipantId());
-				encounterParticipantLanguage.setUuid(encounterParticipantLanguage.getUuid());
-				encounterParticipantWrittenLanguageRepo.save(encounterParticipantLanguage);
-				ePLanguages.add(encounterParticipantLanguage);
-			} else if (languages != null
-					&& !getUpdatedByParticipantId.contains(encounterParticipantRequestDto.getUpdateByPartcipantId())) {
-				encounterParticipantWrittenLanguageRepo.deleteByMemberandStaffId(encounter_participant_id,
-						getUpdatedByParticipantId);
-				EncounterParticipantWrittenLanguage encounterParticipantLanguage = new EncounterParticipantWrittenLanguage();
-				encounterParticipantLanguage.setEncounterParticipantId(encounter_participant_id);
-				encounterParticipantLanguage.setLanguageId(languageId);
-				encounterParticipantLanguage
-						.setCmParticipantId(encounterParticipantRequestDto.getUpdateByPartcipantId());
-				encounterParticipantLanguage.setUuid(encounterParticipantLanguage.getUuid());
-				encounterParticipantWrittenLanguageRepo.save(encounterParticipantLanguage);
+				//encounterParticipantLanguage.setUuid(encounterParticipantLanguage.getUuid());
+				getLanguageIds.remove(languageId);
 				ePLanguages.add(encounterParticipantLanguage);
 			}
 		}
 		encounterParticipantWrittenLanguageRepo.saveAll(ePLanguages);
-		List<Integer> dbLanguagesId = encounterParticipantWrittenLanguageRepo.getLanguageIds(encounter_participant_id);
-
-		deleteOldWrittenlanguagesById(dbLanguagesId, languagesIds, encounter_participant_id);
+		deleteOldWrittenlanguagesById(getLanguageIds, encounter_participant_id);
 	}
 
-	private void deleteOldlanguagesById(List<Integer> dbLanguagesId, List<Integer> languagesId,
-			long encounterParticipantId) {
-		List<Integer> deleteIds = null;
-		if (dbLanguagesId != null && dbLanguagesId.size() > 0 && languagesId != null && languagesId.size() > 0) {
-			deleteIds = dbLanguagesId.stream().filter(e -> !languagesId.contains(e)).collect(Collectors.toList());
-		}
-		if (deleteIds != null) {
-			encounterParticipantLanguageRepo.deleteByLanguageList(encounterParticipantId, deleteIds);
-		}
+	private void deleteOldlanguagesById(List<Integer> dbLanguagesId,
+			Long encounterParticipantId) {
+		if (dbLanguagesId != null && dbLanguagesId.size() > 0) {
+			encounterParticipantLanguageRepo.deleteByLanguageList(encounterParticipantId, dbLanguagesId);
+		}	
 	}
 
-	private void deleteOldWrittenlanguagesById(List<Integer> dbLanguagesId, List<Integer> languagesId,
-			long encounterParticipantId) {
-		List<Integer> deleteIds = null;
-		if (dbLanguagesId != null && dbLanguagesId.size() > 0 && languagesId != null && languagesId.size() > 0) {
-			deleteIds = dbLanguagesId.stream().filter(e -> !languagesId.contains(e)).collect(Collectors.toList());
-		}
-		if (deleteIds != null) {
-			encounterParticipantWrittenLanguageRepo.deleteByLanguageList(encounterParticipantId, deleteIds);
+	private void deleteOldWrittenlanguagesById(List<Integer> dbLanguagesId, 
+			Long encounterParticipantId) {
+		if (dbLanguagesId != null && dbLanguagesId.size() > 0) {
+			encounterParticipantWrittenLanguageRepo.deleteByLanguageList(encounterParticipantId, dbLanguagesId);
 		}
 	}
 
-	private void deleteOldRacesById(List<Integer> dbRaceIds, List<Integer> racesId, long encounterParticipantId) {
-		List<Integer> deleteIds = null;
-		if (dbRaceIds != null && dbRaceIds.size() > 0 && racesId != null && racesId.size() > 0) {
-			deleteIds = dbRaceIds.stream().filter(e -> !racesId.contains(e)).collect(Collectors.toList());
-		}
-		if (deleteIds != null) {
-			encounterParticipantRaceRepo.deleteByRaceList(encounterParticipantId, deleteIds);
+	private void deleteOldRacesById(List<Integer> dbRaceIds, Long encounterParticipantId) {
+		if (dbRaceIds != null && dbRaceIds.size() > 0) {
+			encounterParticipantRaceRepo.deleteByRaceList(encounterParticipantId, dbRaceIds);
 		}
 	}
 

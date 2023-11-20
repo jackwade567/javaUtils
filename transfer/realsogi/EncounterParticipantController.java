@@ -4,6 +4,7 @@ import java.util.Map;
 
 import javax.validation.Valid;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,14 +26,14 @@ import com.bcbsfl.ccn.realsogi.exception.ServiceErrorException;
 import com.bcbsfl.ccn.realsogi.services.EncounterParticipantServiceImpl;
 
 @RestController
-@RequestMapping("mmp/v1/api")
+@RequestMapping("mmp/api/v1")
 public class EncounterParticipantController {
 	private static final Logger logger = LogManager.getLogger(EncounterParticipantController.class);
 	
 	@Autowired
 	private EncounterParticipantServiceImpl encounterParticipantServiceImpl;
 	
-	@GetMapping("realsogi/REL")
+	@GetMapping("realsogi/ccnconfigs")
 	public ResponseEntity<Map<String, Object>> getAllData() {
 		logger.info("Entering --> realsogi/REL endpoint");
 		return ResponseEntity.ok(encounterParticipantServiceImpl.getAllData());
@@ -63,16 +64,16 @@ public class EncounterParticipantController {
 	}
 	
 
-	@PutMapping("realsogi/encounterparticipant/{encounterParticipantId}")
-	public ResponseEntity<EncounterParticipant> updateEncounterParticipant(@PathVariable Long encounterParticipantId,
+	@PutMapping("realsogi/encounterparticipant/{memberCipId}")
+	public ResponseEntity<EncounterParticipant> updateEncounterParticipant(@PathVariable String memberCipId,
 			@RequestBody EncounterParticipantRequestDto encounterParticipantRequestDto) {
 		logger.info("Entering --> realsogi/encounterparticipant/{memberCipId} endpoint");
-		if (encounterParticipantId != null && encounterParticipantRequestDto != null) {
+		if (memberCipId != null && !StringUtils.isBlank(memberCipId) && encounterParticipantRequestDto != null) {
 			EncounterParticipant updatedEncounterParticipant = encounterParticipantServiceImpl
-					.updateEncounterParticipant(encounterParticipantId, encounterParticipantRequestDto);
+					.updateEncounterParticipant(memberCipId, encounterParticipantRequestDto);
 			return new ResponseEntity<>(updatedEncounterParticipant, HttpStatus.OK);
 		}
-		logger.info("Entering --> realsogi/encounterparticipant/{encounterParticipantId} endpoint - request body is null");
+		logger.info("Entering --> realsogi/encounterparticipant/{memberCipId} endpoint - request body is null");
 		throw new ServiceErrorException(new ApiErrorResponse("404", "memberRequest is null"), HttpStatus.BAD_REQUEST);
 
 	}
