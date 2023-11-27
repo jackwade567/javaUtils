@@ -117,5 +117,4 @@ public class EncounterParticipantRace {
 				+ ", updatedByCmParticipantId=" + updatedByCmParticipantId + ", uuid=" + uuid + ", systemId=" + systemId
 				+ ", createDateTime=" + createDateTime + ", updateDateTime=" + updateDateTime + "]";
 	}
-
 }

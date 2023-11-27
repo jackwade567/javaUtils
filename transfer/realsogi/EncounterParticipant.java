@@ -117,5 +117,4 @@ public class EncounterParticipant {
 				+ ", encounterParticipantPartyId=" + encounterParticipantPartyId + ", createDateTime=" + createDateTime
 				+ ", updateDateTime=" + updateDateTime + "]";
 	}
-
 }

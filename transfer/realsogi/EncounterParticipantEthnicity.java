@@ -110,5 +110,4 @@ public class EncounterParticipantEthnicity {
 				+ ", updatedByCmParticipantId=" + updatedByCmParticipantId + ", uuid=" + uuid + ", systemId=" + systemId
 				+ ", createDateTime=" + createDateTime + ", updateDateTime=" + updateDateTime + "]";
 	}
-
 }

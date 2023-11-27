@@ -130,5 +130,4 @@ public class EncounterParticipantWrittenLanguage {
 				+ ", uuid=" + uuid + ", systemId=" + systemId + ", createDateTime=" + createDateTime
 				+ ", updateDateTime=" + updateDateTime + "]";
 	}
-
 }

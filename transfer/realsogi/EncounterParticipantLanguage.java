@@ -129,5 +129,4 @@ public class EncounterParticipantLanguage {
 				+ status + ", cmParticipantId=" + cmParticipantId + ", uuid=" + uuid + ", systemId=" + systemId
 				+ ", createDateTime=" + createDateTime + ", updateDateTime=" + updateDateTime + "]";
 	}
-
 }
