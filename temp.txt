@@ -16,8 +16,9 @@ public class XmlProcessor {
         try {
             XMLEventReader reader = xmlInputFactory.createXMLEventReader(new FileInputStream(xmlFilePath));
             Stack<String> tagPath = new Stack<>();
-            String elementValue = null;
+            String elementValue = "";
             boolean insidePAResponse = false;
+            boolean isLeafTag = true; // Flag to determine if the tag is a leaf
 
             while (reader.hasNext()) {
                 XMLEvent event = reader.nextEvent();
@@ -29,12 +30,13 @@ public class XmlProcessor {
                         insidePAResponse = true;
                     } else if (insidePAResponse) {
                         tagPath.push(tagName);
+                        elementValue = ""; // Reset the element value on a start element
+                        isLeafTag = true; // Assume this is a leaf tag until proven otherwise
                     }
-                    elementValue = null; // Reset the element value on a start element
                 } else if (event.isCharacters()) {
                     Characters characters = event.asCharacters();
                     if (!characters.isWhiteSpace()) {
-                        elementValue = characters.getData();
+                        elementValue += characters.getData();
                     }
                 } else if (event.isEndElement()) {
                     EndElement endElement = event.asEndElement();
@@ -43,13 +45,19 @@ public class XmlProcessor {
                         insidePAResponse = false;
                         tagPath.clear();
                     } else if (insidePAResponse && !tagPath.isEmpty() && tagName.equals(tagPath.peek())) {
-                        if (elementValue != null) {
-                            // Only print the tag and value if there was a value for this tag
-                            String fullPath = String.join("_", tagPath);
+                        if (isLeafTag) {
+                            // Print the tag and value if it's a leaf tag
+                            String fullPath = String.join("_", tagPath.subList(1, tagPath.size())); // Exclude the "PAResponse" tag
                             System.out.println(fullPath + ": " + elementValue);
                         }
                         tagPath.pop();
+                        elementValue = ""; // Reset the element value
                     }
+                }
+
+                // If a new start tag is encountered after the current start tag, the current tag is not a leaf
+                if (event.isStartElement() && tagPath.size() > 1) {
+                    isLeafTag = false;
                 }
             }
         } catch (XMLStreamException e) {
