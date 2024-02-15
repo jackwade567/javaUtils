@@ -24,14 +24,8 @@ public class XmlProcessor {
                     String tagName = startElement.getName().getLocalPart();
 
                     if ("PAResponse".equals(tagName)) {
-                        if (insidePAResponse) {
-                            // We are already processing a PAResponse, so this is a nested one.
-                            // Depending on the requirement, you may want to skip it or handle it differently.
-                            continue;
-                        }
                         insidePAResponse = true;
-                        tagPath.push(tagName);
-                        continue;
+                        continue; // Skip the PAResponse tag itself
                     }
 
                     if (insidePAResponse) {
@@ -44,6 +38,7 @@ public class XmlProcessor {
 
                     if ("PAResponse".equals(tagName) && insidePAResponse) {
                         insidePAResponse = false;
+                        tagPath.clear(); // Clear the stack as we are out of PAResponse
                         break; // Exit after the end of the first PAResponse tag
                     }
 
@@ -58,8 +53,11 @@ public class XmlProcessor {
     }
 
     private void printTagPath(Stack<String> tagPath) {
-        String prefix = String.join("_", tagPath);
-        System.out.println(prefix);
+        // Skip printing if the stack is empty
+        if (!tagPath.isEmpty()) {
+            String prefix = String.join("_", tagPath);
+            System.out.println(prefix);
+        }
     }
 
     public static void main(String[] args) {
