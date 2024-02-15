@@ -2,6 +2,7 @@ import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.events.XMLEvent;
 import javax.xml.stream.events.StartElement;
+import javax.xml.stream.events.Characters;
 import javax.xml.stream.events.EndElement;
 import javax.xml.stream.XMLStreamException;
 import java.io.FileInputStream;
@@ -9,14 +10,14 @@ import java.util.Stack;
 
 public class XmlProcessor {
 
-    public void printFirstPAResponseTagValues(String xmlFilePath) {
+    public void printTagValuesWithHierarchy(String xmlFilePath) {
         XMLInputFactory xmlInputFactory = XMLInputFactory.newInstance();
 
         try {
             XMLEventReader reader = xmlInputFactory.createXMLEventReader(new FileInputStream(xmlFilePath));
-            boolean insidePAResponse = false;
             Stack<String> tagPath = new Stack<>();
-            boolean isLeaf = true; // Flag to check if the current tag is a leaf
+            String elementValue = null;
+            boolean insidePAResponse = false;
 
             while (reader.hasNext()) {
                 XMLEvent event = reader.nextEvent();
@@ -24,59 +25,40 @@ public class XmlProcessor {
                 if (event.isStartElement()) {
                     StartElement startElement = event.asStartElement();
                     String tagName = startElement.getName().getLocalPart();
-
                     if ("PAResponse".equals(tagName)) {
                         insidePAResponse = true;
                     } else if (insidePAResponse) {
-                        tagPath.push(tagName); // Push the tag name onto the stack
-                        isLeaf = true; // Assume this tag is a leaf until we find a nested tag
+                        tagPath.push(tagName);
                     }
-                } else if (event.isCharacters() && insidePAResponse && !event.asCharacters().isWhiteSpace()) {
-                    if (isLeaf) { // Only print the value if the current tag is a leaf
-                        String value = event.asCharacters().getData();
-                        printTagPath(tagPath, value); // Print the tag and value
+                    elementValue = null; // Reset the element value on a start element
+                } else if (event.isCharacters()) {
+                    Characters characters = event.asCharacters();
+                    if (!characters.isWhiteSpace()) {
+                        elementValue = characters.getData();
                     }
                 } else if (event.isEndElement()) {
                     EndElement endElement = event.asEndElement();
                     String tagName = endElement.getName().getLocalPart();
-
                     if ("PAResponse".equals(tagName)) {
                         insidePAResponse = false;
-                        break; // We're done with the first PAResponse
-                    }
-
-                    if (insidePAResponse && !tagPath.isEmpty() && tagName.equals(tagPath.peek())) {
-                        if (isLeaf) {
-                            // If no value was printed for this leaf, print the tag with an empty value
-                            printTagPath(tagPath, "");
+                        tagPath.clear();
+                    } else if (insidePAResponse && !tagPath.isEmpty() && tagName.equals(tagPath.peek())) {
+                        if (elementValue != null) {
+                            // Only print the tag and value if there was a value for this tag
+                            String fullPath = String.join("_", tagPath);
+                            System.out.println(fullPath + ": " + elementValue);
                         }
-                        tagPath.pop(); // Remove the tag from the stack after processing
-                        isLeaf = false; // Reset the leaf flag as we move up the tree
+                        tagPath.pop();
                     }
                 }
-
-                // If we find a start element within another, then the previous tag is not a leaf
-                if (event.isStartElement() && !tagPath.isEmpty()) {
-                    isLeaf = false;
-                }
             }
-        } catch (Exception e) {
+        } catch (XMLStreamException e) {
             e.printStackTrace();
-        }
-    }
-
-    private void printTagPath(Stack<String> tagPath, String value) {
-        if (!tagPath.isEmpty()) {
-            // Create a prefix excluding the 'PAResponse' and the current tag itself
-            String prefix = String.join("_", tagPath.subList(1, tagPath.size())); // Exclude the "PAResponse" tag
-            if (!prefix.isEmpty()) {
-                System.out.println(prefix + ": " + value);
-            }
         }
     }
 
     public static void main(String[] args) {
         XmlProcessor processor = new XmlProcessor();
-        processor.printFirstPAResponseTagValues("path_to_your_xml_file.xml"); // Replace with the file path
+        processor.printTagValuesWithHierarchy("path_to_your_xml_file.xml"); // Replace with your actual file path
     }
 }
