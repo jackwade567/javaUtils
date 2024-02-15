@@ -2,6 +2,7 @@ import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.events.XMLEvent;
 import javax.xml.stream.events.StartElement;
+import javax.xml.stream.events.Characters;
 import javax.xml.stream.events.EndElement;
 import javax.xml.stream.XMLStreamException;
 import java.io.FileInputStream;
@@ -14,15 +15,17 @@ public class XmlProcessor {
 
         try {
             XMLEventReader reader = xmlInputFactory.createXMLEventReader(new FileInputStream(xmlFilePath));
-            boolean foundPAResponse = false; // Flag to indicate we found the PAResponse tag
+            boolean insidePAResponse = false; // Flag to track if we're inside the PAResponse tag
 
-            while (reader.hasNext() && !foundPAResponse) {
+            while (reader.hasNext()) {
                 XMLEvent event = reader.nextEvent();
                 if (event.isStartElement() && event.asStartElement().getName().getLocalPart().equals("PAResponse")) {
-                    foundPAResponse = true;
+                    insidePAResponse = true;
                     Stack<String> tagPath = new Stack<>();
-                    tagPath.push(event.asStartElement().getName().getLocalPart());
                     processNestedTags(reader, tagPath);
+                } else if (event.isEndElement() && event.asEndElement().getName().getLocalPart().equals("PAResponse")) {
+                    insidePAResponse = false;
+                    break; // Stop after exiting the PAResponse tag
                 }
             }
         } catch (Exception e) {
@@ -33,24 +36,23 @@ public class XmlProcessor {
     private void processNestedTags(XMLEventReader reader, Stack<String> tagPath) throws XMLStreamException {
         while (reader.hasNext()) {
             XMLEvent event = reader.nextEvent();
+            
             if (event.isStartElement()) {
                 StartElement startElement = event.asStartElement();
                 String tagName = startElement.getName().getLocalPart();
                 tagPath.push(tagName);
-
-                if (reader.peek().isCharacters()) {
-                    String value = reader.getElementText();
-                    String prefix = String.join("_", tagPath.subList(0, tagPath.size() - 1));
-                    System.out.println(prefix + "_" + tagName + ": " + value);
+            } else if (event.isCharacters()) {
+                Characters characters = event.asCharacters();
+                if (!characters.isWhiteSpace()) { // Ignore whitespace
+                    String value = characters.getData();
+                    String prefix = String.join("_", tagPath);
+                    System.out.println(prefix + ": " + value);
                 }
             } else if (event.isEndElement()) {
                 EndElement endElement = event.asEndElement();
                 String tagName = endElement.getName().getLocalPart();
                 if (!tagPath.isEmpty() && tagName.equals(tagPath.peek())) {
-                    tagPath.pop();
-                    if (tagName.equals("PAResponse")) {
-                        return; // End processing after completing the PAResponse tag
-                    }
+                    tagPath.pop(); // Pop the tag from the stack when we reach its end tag
                 }
             }
         }
