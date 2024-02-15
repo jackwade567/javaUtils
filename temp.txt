@@ -16,6 +16,7 @@ public class XmlProcessor {
             XMLEventReader reader = xmlInputFactory.createXMLEventReader(new FileInputStream(xmlFilePath));
             boolean insidePAResponse = false; // Flag to track if we're inside the PAResponse tag
             Stack<String> tagPath = new Stack<>(); // Stack to keep track of nested tags
+            Stack<Boolean> leafNodeStack = new Stack<>(); // Stack to keep track if current node is a leaf
 
             while (reader.hasNext()) {
                 XMLEvent event = reader.nextEvent();
@@ -25,12 +26,18 @@ public class XmlProcessor {
 
                     if ("PAResponse".equals(tagName)) {
                         insidePAResponse = true; // We have entered the PAResponse tag
+                        leafNodeStack.push(true); // The PAResponse itself is not considered a leaf node
                     } else if (insidePAResponse) {
                         // Push the tag onto the stack if we are within a PAResponse
                         tagPath.push(tagName);
+                        leafNodeStack.push(true); // Assume it's a leaf node until we find a nested tag
                     }
                 } else if (event.isCharacters() && insidePAResponse && !event.asCharacters().isWhiteSpace()) {
                     String value = event.asCharacters().getData();
+                    if (!leafNodeStack.peek()) {
+                        // Not a leaf node, skip printing
+                        continue;
+                    }
                     printTagPath(tagPath); // Print the current tag path
                     System.out.println(": " + value);
                 } else if (event.isEndElement()) {
@@ -39,16 +46,22 @@ public class XmlProcessor {
 
                     if ("PAResponse".equals(tagName)) {
                         insidePAResponse = false; // We have exited the PAResponse tag
+                        leafNodeStack.pop(); // Pop the PAResponse node
                         break; // Stop processing since we're done with the first PAResponse
                     } else if (!tagPath.isEmpty() && tagName.equals(tagPath.peek())) {
-                        // Pop the tag from the stack when we reach its end tag
-                        // Only print the tag path if the stack will be empty (meaning it's a leaf node)
-                        if (tagPath.size() == 1) {
+                        tagPath.pop(); // Pop the tag from the stack when we reach its end tag
+                        boolean wasLeafNode = leafNodeStack.pop(); // Check if it was a leaf node
+                        // If it was a leaf node and the stack is empty, print the path
+                        if (wasLeafNode && tagPath.isEmpty()) {
                             printTagPath(tagPath);
                             System.out.println(": " + ""); // Print empty value for leaf nodes
                         }
-                        tagPath.pop();
                     }
+                }
+                
+                // If we find a start tag inside another tag, it's not a leaf node
+                if (!leafNodeStack.isEmpty() && event.isStartElement() && !tagPath.isEmpty()) {
+                    leafNodeStack.set(leafNodeStack.size() - 1, false);
                 }
             }
         } catch (Exception e) {
@@ -57,12 +70,9 @@ public class XmlProcessor {
     }
 
     private void printTagPath(Stack<String> tagPath) {
-        // Join all tags except the last one to create the prefix
-        if (tagPath.size() > 1) {
-            String prefix = String.join("_", tagPath.subList(0, tagPath.size() - 1));
-            System.out.print(prefix + "_" + tagPath.peek());
-        } else {
-            System.out.print(tagPath.peek());
+        if (!tagPath.isEmpty()) {
+            String prefix = String.join("_", tagPath);
+            System.out.print(prefix);
         }
     }
 
