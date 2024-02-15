@@ -16,7 +16,7 @@ public class XmlProcessor {
             XMLEventReader reader = xmlInputFactory.createXMLEventReader(new FileInputStream(xmlFilePath));
             boolean insidePAResponse = false;
             Stack<String> tagPath = new Stack<>();
-            boolean hasValue = false;
+            boolean isValuePrinted = false;
 
             while (reader.hasNext()) {
                 XMLEvent event = reader.nextEvent();
@@ -27,15 +27,18 @@ public class XmlProcessor {
 
                     if ("PAResponse".equals(tagName)) {
                         insidePAResponse = true;
-                    } else if (insidePAResponse) {
-                        tagPath.push(tagName);
-                        hasValue = false; // Reset the value flag for the new element
+                        continue; // Skip this tag but mark that we're inside it
                     }
-                } else if (event.isCharacters() && insidePAResponse) {
-                    String text = event.asCharacters().getData().trim();
-                    if (!text.isEmpty()) {
-                        hasValue = true; // Set the value flag if text is found
-                        printTagPath(tagPath, text); // Print the tag and value
+
+                    if (insidePAResponse) {
+                        tagPath.push(tagName); // Push the tag name onto the stack
+                        isValuePrinted = false; // Reset the flag as this is a new tag
+                    }
+                } else if (event.isCharacters() && insidePAResponse && !event.asCharacters().isWhiteSpace()) {
+                    String value = event.asCharacters().getData();
+                    if (!isValuePrinted) {
+                        printTagPath(tagPath, value); // Print the tag and value
+                        isValuePrinted = true;
                     }
                 } else if (event.isEndElement()) {
                     EndElement endElement = event.asEndElement();
@@ -43,13 +46,16 @@ public class XmlProcessor {
 
                     if ("PAResponse".equals(tagName)) {
                         insidePAResponse = false;
-                        break; // Stop after the PAResponse tag
-                    } else if (insidePAResponse && !tagPath.isEmpty() && tagName.equals(tagPath.peek())) {
-                        if (!hasValue) {
-                            // If the closing tag is reached and no value was found, print the tag with an empty value
+                        break; // We're done with the first PAResponse
+                    }
+
+                    if (insidePAResponse && !tagPath.isEmpty() && tagName.equals(tagPath.peek())) {
+                        if (!isValuePrinted) {
+                            // The tag had no value, print with an empty value
                             printTagPath(tagPath, "");
                         }
-                        tagPath.pop(); // Remove the tag from the stack after processing
+                        tagPath.pop(); // This tag is fully processed, remove it
+                        isValuePrinted = false; // Reset the flag as we might encounter more tags
                     }
                 }
             }
@@ -60,13 +66,17 @@ public class XmlProcessor {
 
     private void printTagPath(Stack<String> tagPath, String value) {
         if (!tagPath.isEmpty()) {
-            String prefix = String.join("_", tagPath.subList(1, tagPath.size())); // Exclude the "PAResponse" tag
-            System.out.println(prefix + ": " + value);
+            // Create a prefix excluding the 'PAResponse' and the current tag itself
+            String prefix = String.join("_", tagPath.subList(0, tagPath.size() - 1));
+            if (!prefix.isEmpty()) {
+                prefix += "_"; // Add an underscore only if there is a prefix
+            }
+            System.out.println(prefix + tagPath.peek() + ": " + value);
         }
     }
 
     public static void main(String[] args) {
         XmlProcessor processor = new XmlProcessor();
-        processor.printFirstPAResponseTagValues("path_to_your_xml_file.xml"); // Replace with your actual file path
+        processor.printFirstPAResponseTagValues("path_to_your_xml_file.xml"); // Replace with the file path
     }
 }
