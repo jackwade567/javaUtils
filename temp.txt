@@ -1,23 +1,58 @@
-while (reader.hasNext()) {
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLEventReader;
+import javax.xml.stream.events.XMLEvent;
+import javax.xml.stream.events.StartElement;
+import javax.xml.stream.events.EndElement;
+import javax.xml.stream.XMLStreamException;
+import java.io.FileInputStream;
+import java.util.Stack;
+
+public class XmlProcessor {
+
+    public void printFirstPAResponseTagsAndValues(String xmlFilePath) {
+        XMLInputFactory xmlInputFactory = XMLInputFactory.newInstance();
+
+        try {
+            XMLEventReader reader = xmlInputFactory.createXMLEventReader(new FileInputStream(xmlFilePath));
+            boolean foundPAResponse = false; // Flag to indicate we found the PAResponse tag
+
+            while (reader.hasNext() && !foundPAResponse) {
+                XMLEvent event = reader.nextEvent();
+                if (event.isStartElement() && event.asStartElement().getName().getLocalPart().equals("PAResponse")) {
+                    foundPAResponse = true;
+                    Stack<String> tagPath = new Stack<>();
+                    tagPath.push(event.asStartElement().getName().getLocalPart());
+                    processNestedTags(reader, tagPath);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void processNestedTags(XMLEventReader reader, Stack<String> tagPath) throws XMLStreamException {
+        while (reader.hasNext()) {
             XMLEvent event = reader.nextEvent();
             if (event.isStartElement()) {
                 StartElement startElement = event.asStartElement();
                 String tagName = startElement.getName().getLocalPart();
                 tagPath.push(tagName);
 
-                // Only print and process further if the next event is characters (the actual value)
                 if (reader.peek().isCharacters()) {
                     String value = reader.getElementText();
-                    // Concatenate the tag path except the last element, which is the current tag
                     String prefix = String.join("_", tagPath.subList(0, tagPath.size() - 1));
                     System.out.println(prefix + "_" + tagName + ": " + value);
-                    tagPath.pop();  // Remove the current tag as we've processed its value
                 }
             } else if (event.isEndElement()) {
                 EndElement endElement = event.asEndElement();
                 String tagName = endElement.getName().getLocalPart();
                 if (!tagPath.isEmpty() && tagName.equals(tagPath.peek())) {
-                    tagPath.pop();  // If we're at the end tag, remove the tag from the stack
+                    tagPath.pop();
+                    if (tagName.equals("PAResponse")) {
+                        return; // End processing after completing the PAResponse tag
+                    }
                 }
             }
         }
+    }
+}
