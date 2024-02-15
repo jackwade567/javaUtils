@@ -10,15 +10,14 @@ import java.util.Stack;
 
 public class XmlProcessor {
 
-    public void printTagValuesWithHierarchy(String xmlFilePath) {
+    public void printEndTagValuesWithHierarchy(String xmlFilePath) {
         XMLInputFactory xmlInputFactory = XMLInputFactory.newInstance();
 
         try {
             XMLEventReader reader = xmlInputFactory.createXMLEventReader(new FileInputStream(xmlFilePath));
             Stack<String> tagPath = new Stack<>();
-            String elementValue = "";
+            String elementValue = null;
             boolean insidePAResponse = false;
-            boolean isLeafTag = true; // Flag to determine if the tag is a leaf
 
             while (reader.hasNext()) {
                 XMLEvent event = reader.nextEvent();
@@ -29,35 +28,27 @@ public class XmlProcessor {
                     if ("PAResponse".equals(tagName)) {
                         insidePAResponse = true;
                     } else if (insidePAResponse) {
-                        tagPath.push(tagName);
-                        elementValue = ""; // Reset the element value on a start element
-                        isLeafTag = true; // Assume this is a leaf tag until proven otherwise
+                        tagPath.push(tagName); // Push the tag name onto the stack
+                        elementValue = null; // Reset the element value on a start element
                     }
                 } else if (event.isCharacters()) {
                     Characters characters = event.asCharacters();
                     if (!characters.isWhiteSpace()) {
-                        elementValue += characters.getData();
+                        elementValue = characters.getData();
                     }
                 } else if (event.isEndElement()) {
                     EndElement endElement = event.asEndElement();
                     String tagName = endElement.getName().getLocalPart();
                     if ("PAResponse".equals(tagName)) {
                         insidePAResponse = false;
-                        tagPath.clear();
                     } else if (insidePAResponse && !tagPath.isEmpty() && tagName.equals(tagPath.peek())) {
-                        if (isLeafTag) {
-                            // Print the tag and value if it's a leaf tag
-                            String fullPath = String.join("_", tagPath.subList(1, tagPath.size())); // Exclude the "PAResponse" tag
+                        if (elementValue != null) {
+                            // Only print the tag and value if there was a value for this tag
+                            String fullPath = buildPath(tagPath);
                             System.out.println(fullPath + ": " + elementValue);
                         }
-                        tagPath.pop();
-                        elementValue = ""; // Reset the element value
+                        tagPath.pop(); // This tag is fully processed, remove it
                     }
-                }
-
-                // If a new start tag is encountered after the current start tag, the current tag is not a leaf
-                if (event.isStartElement() && tagPath.size() > 1) {
-                    isLeafTag = false;
                 }
             }
         } catch (XMLStreamException e) {
@@ -65,8 +56,22 @@ public class XmlProcessor {
         }
     }
 
+    private String buildPath(Stack<String> tagPath) {
+        // We don't include the PAResponse tag in the path, and we don't include the current tag
+        if (tagPath.size() > 1) {
+            Stack<String> tempStack = new Stack<>();
+            tempStack.addAll(tagPath);
+            tempStack.pop(); // Remove the current tag to only get the parent prefix
+            String parentTag = tempStack.pop(); // This will be the immediate parent tag
+            String prefix = parentTag + "_" + tagPath.peek();
+            return prefix;
+        } else {
+            return tagPath.peek();
+        }
+    }
+
     public static void main(String[] args) {
         XmlProcessor processor = new XmlProcessor();
-        processor.printTagValuesWithHierarchy("path_to_your_xml_file.xml"); // Replace with your actual file path
+        processor.printEndTagValuesWithHierarchy("path_to_your_xml_file.xml"); // Replace with the actual file path
     }
 }
