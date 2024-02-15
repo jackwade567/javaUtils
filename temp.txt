@@ -10,13 +10,13 @@ import java.util.Stack;
 
 public class XmlProcessor {
 
-    public void printEndTagValuesWithHierarchy(String xmlFilePath) {
+    public void printLeafTagValuesWithHierarchy(String xmlFilePath) {
         XMLInputFactory xmlInputFactory = XMLInputFactory.newInstance();
 
         try {
             XMLEventReader reader = xmlInputFactory.createXMLEventReader(new FileInputStream(xmlFilePath));
             Stack<String> tagPath = new Stack<>();
-            StringBuilder elementValue = new StringBuilder();
+            Stack<Boolean> hasContentStack = new Stack<>(); // Stack to track if tags have content
             boolean insidePAResponse = false;
 
             while (reader.hasNext()) {
@@ -27,27 +27,30 @@ public class XmlProcessor {
                     String tagName = startElement.getName().getLocalPart();
                     if ("PAResponse".equals(tagName)) {
                         insidePAResponse = true;
-                        continue; // Skip the PAResponse tag but mark that we're inside it
-                    }
-                    if (insidePAResponse) {
+                    } else if (insidePAResponse) {
                         tagPath.push(tagName); // Push the tag name onto the stack
-                        elementValue.setLength(0); // Reset the element value
+                        hasContentStack.push(false); // Initialize as false, meaning no content yet
                     }
                 } else if (event.isCharacters() && insidePAResponse) {
-                    elementValue.append(event.asCharacters().getData());
+                    Characters characters = event.asCharacters();
+                    if (!characters.isWhiteSpace()) {
+                        if (!hasContentStack.isEmpty()) {
+                            hasContentStack.pop();
+                            hasContentStack.push(true); // Set to true, the tag contains content
+                        }
+                    }
                 } else if (event.isEndElement()) {
                     EndElement endElement = event.asEndElement();
                     String tagName = endElement.getName().getLocalPart();
                     if ("PAResponse".equals(tagName)) {
                         insidePAResponse = false;
                     } else if (insidePAResponse && !tagPath.isEmpty() && tagName.equals(tagPath.peek())) {
-                        // Only print the tag and value if this is an end tag within PAResponse
-                        if (tagPath.size() > 1) { // Ensure it's not a direct child of PAResponse
+                        boolean hasContent = !hasContentStack.pop(); // Check if the tag had content
+                        if (!hasContent) { // If no content, this is a leaf node
                             String fullPath = buildPath(tagPath);
-                            System.out.println(fullPath + ": " + elementValue.toString().trim());
+                            System.out.println(fullPath + ": "); // Print the tag with an empty value
                         }
-                        tagPath.pop();
-                        elementValue.setLength(0); // Reset the element value
+                        tagPath.pop(); // The tag is fully processed, remove it from the stack
                     }
                 }
             }
@@ -57,23 +60,18 @@ public class XmlProcessor {
     }
 
     private String buildPath(Stack<String> tagPath) {
-        // Join the tags using underscores, but skip the PAResponse tag
-        Stack<String> tempStack = new Stack<>();
-        tempStack.addAll(tagPath);
-        tempStack.pop(); // Remove the current tag
-        
-        StringBuilder pathBuilder = new StringBuilder();
-        while (!tempStack.isEmpty()) {
-            pathBuilder.insert(0, tempStack.pop());
-            if (!tempStack.isEmpty()) {
-                pathBuilder.insert(0, "_");
-            }
+        // Skip the 'PAResponse' tag and build the path for the current tag
+        if (!tagPath.isEmpty()) {
+            Stack<String> tempStack = new Stack<>();
+            tempStack.addAll(tagPath);
+            tempStack.pop(); // Remove the current tag to only get the parent tags
+            return String.join("_", tempStack);
         }
-        return pathBuilder.toString();
+        return "";
     }
 
     public static void main(String[] args) {
         XmlProcessor processor = new XmlProcessor();
-        processor.printEndTagValuesWithHierarchy("path_to_your_xml_file.xml"); // Replace with the actual file path
+        processor.printLeafTagValuesWithHierarchy("path_to_your_xml_file.xml"); // Replace with the actual file path
     }
 }
