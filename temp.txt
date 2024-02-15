@@ -9,7 +9,7 @@ import java.util.Stack;
 
 public class XmlProcessor {
 
-    public void printFirstPAResponseTags(String xmlFilePath) {
+    public void printFirstPAResponseTagValues(String xmlFilePath) {
         XMLInputFactory xmlInputFactory = XMLInputFactory.newInstance();
 
         try {
@@ -24,26 +24,27 @@ public class XmlProcessor {
                     String tagName = startElement.getName().getLocalPart();
 
                     if ("PAResponse".equals(tagName)) {
-                        insidePAResponse = true;
-                        continue; // Skip the PAResponse tag itself
-                    }
-
-                    if (insidePAResponse) {
+                        insidePAResponse = true; // We have entered the PAResponse tag
+                    } else if (insidePAResponse) {
+                        // Push the tag onto the stack if we are within a PAResponse
                         tagPath.push(tagName);
-                        printTagPath(tagPath); // Print the path for the current tag
+                    }
+                } else if (event.isCharacters() && insidePAResponse) {
+                    String value = event.asCharacters().getData().trim();
+                    if (!value.isEmpty()) {
+                        // We have a value, so print the current tag path minus the last element
+                        printTagPath(tagPath);
+                        System.out.println(": " + value);
                     }
                 } else if (event.isEndElement()) {
                     EndElement endElement = event.asEndElement();
                     String tagName = endElement.getName().getLocalPart();
 
-                    if ("PAResponse".equals(tagName) && insidePAResponse) {
-                        insidePAResponse = false;
-                        tagPath.clear(); // Clear the stack as we are out of PAResponse
-                        break; // Exit after the end of the first PAResponse tag
-                    }
-
-                    if (!tagPath.isEmpty() && tagName.equals(tagPath.peek())) {
-                        tagPath.pop();
+                    if ("PAResponse".equals(tagName)) {
+                        insidePAResponse = false; // We have exited the PAResponse tag
+                        break; // Stop processing since we're done with the first PAResponse
+                    } else if (!tagPath.isEmpty() && tagName.equals(tagPath.peek())) {
+                        tagPath.pop(); // Pop the tag from the stack when we reach its end tag
                     }
                 }
             }
@@ -53,15 +54,17 @@ public class XmlProcessor {
     }
 
     private void printTagPath(Stack<String> tagPath) {
-        // Skip printing if the stack is empty
-        if (!tagPath.isEmpty()) {
-            String prefix = String.join("_", tagPath);
-            System.out.println(prefix);
+        // Join all tags except the last one to create the prefix
+        if (tagPath.size() > 1) {
+            String prefix = String.join("_", tagPath.subList(0, tagPath.size() - 1));
+            System.out.print(prefix + "_" + tagPath.peek());
+        } else {
+            System.out.print(tagPath.peek());
         }
     }
 
     public static void main(String[] args) {
         XmlProcessor processor = new XmlProcessor();
-        processor.printFirstPAResponseTags("path_to_your_xml_file.xml"); // Replace with your actual file path
+        processor.printFirstPAResponseTagValues("path_to_your_xml_file.xml"); // Replace with your actual file path
     }
 }
