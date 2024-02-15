@@ -16,37 +16,40 @@ public class XmlProcessor {
             XMLEventReader reader = xmlInputFactory.createXMLEventReader(new FileInputStream(xmlFilePath));
             boolean insidePAResponse = false;
             Stack<String> tagPath = new Stack<>();
-            String currentText = "";
+            boolean hasValue = false;
 
             while (reader.hasNext()) {
                 XMLEvent event = reader.nextEvent();
-                
+
                 if (event.isStartElement()) {
                     StartElement startElement = event.asStartElement();
                     String tagName = startElement.getName().getLocalPart();
+
                     if ("PAResponse".equals(tagName)) {
                         insidePAResponse = true;
                     } else if (insidePAResponse) {
                         tagPath.push(tagName);
-                        currentText = ""; // Reset current text when starting a new element
+                        hasValue = false; // Reset the value flag for the new element
                     }
                 } else if (event.isCharacters() && insidePAResponse) {
-                    currentText = event.asCharacters().getData().trim();
+                    String text = event.asCharacters().getData().trim();
+                    if (!text.isEmpty()) {
+                        hasValue = true; // Set the value flag if text is found
+                        printTagPath(tagPath, text); // Print the tag and value
+                    }
                 } else if (event.isEndElement()) {
                     EndElement endElement = event.asEndElement();
                     String tagName = endElement.getName().getLocalPart();
 
                     if ("PAResponse".equals(tagName)) {
                         insidePAResponse = false;
-                        break; // Stop after exiting the PAResponse tag
+                        break; // Stop after the PAResponse tag
                     } else if (insidePAResponse && !tagPath.isEmpty() && tagName.equals(tagPath.peek())) {
-                        if (!currentText.isEmpty() || tagPath.size() == 1) {
-                            // Print the tag and its value only if it has text or is a direct child of PAResponse
-                            printTagPath(tagPath);
-                            System.out.println(": " + currentText);
+                        if (!hasValue) {
+                            // If the closing tag is reached and no value was found, print the tag with an empty value
+                            printTagPath(tagPath, "");
                         }
                         tagPath.pop(); // Remove the tag from the stack after processing
-                        currentText = ""; // Reset current text after printing a value
                     }
                 }
             }
@@ -55,11 +58,10 @@ public class XmlProcessor {
         }
     }
 
-    private void printTagPath(Stack<String> tagPath) {
+    private void printTagPath(Stack<String> tagPath, String value) {
         if (!tagPath.isEmpty()) {
-            // We want to skip the first element which is 'PAResponse'
-            String prefix = String.join("_", tagPath.subList(1, tagPath.size()));
-            System.out.print(prefix);
+            String prefix = String.join("_", tagPath.subList(1, tagPath.size())); // Exclude the "PAResponse" tag
+            System.out.println(prefix + ": " + value);
         }
     }
 
