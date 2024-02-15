@@ -29,13 +29,10 @@ public class XmlProcessor {
                         // Push the tag onto the stack if we are within a PAResponse
                         tagPath.push(tagName);
                     }
-                } else if (event.isCharacters() && insidePAResponse) {
-                    String value = event.asCharacters().getData().trim();
-                    if (!value.isEmpty()) {
-                        // We have a value, so print the current tag path minus the last element
-                        printTagPath(tagPath);
-                        System.out.println(": " + value);
-                    }
+                } else if (event.isCharacters() && insidePAResponse && !event.asCharacters().isWhiteSpace()) {
+                    String value = event.asCharacters().getData();
+                    printTagPath(tagPath); // Print the current tag path
+                    System.out.println(": " + value);
                 } else if (event.isEndElement()) {
                     EndElement endElement = event.asEndElement();
                     String tagName = endElement.getName().getLocalPart();
@@ -44,7 +41,13 @@ public class XmlProcessor {
                         insidePAResponse = false; // We have exited the PAResponse tag
                         break; // Stop processing since we're done with the first PAResponse
                     } else if (!tagPath.isEmpty() && tagName.equals(tagPath.peek())) {
-                        tagPath.pop(); // Pop the tag from the stack when we reach its end tag
+                        // Pop the tag from the stack when we reach its end tag
+                        // Only print the tag path if the stack will be empty (meaning it's a leaf node)
+                        if (tagPath.size() == 1) {
+                            printTagPath(tagPath);
+                            System.out.println(": " + ""); // Print empty value for leaf nodes
+                        }
+                        tagPath.pop();
                     }
                 }
             }
