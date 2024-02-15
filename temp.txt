@@ -16,7 +16,7 @@ public class XmlProcessor {
         try {
             XMLEventReader reader = xmlInputFactory.createXMLEventReader(new FileInputStream(xmlFilePath));
             Stack<String> tagPath = new Stack<>();
-            String elementValue = null;
+            StringBuilder elementValue = new StringBuilder();
             boolean insidePAResponse = false;
 
             while (reader.hasNext()) {
@@ -27,27 +27,27 @@ public class XmlProcessor {
                     String tagName = startElement.getName().getLocalPart();
                     if ("PAResponse".equals(tagName)) {
                         insidePAResponse = true;
-                    } else if (insidePAResponse) {
+                        continue; // Skip the PAResponse tag but mark that we're inside it
+                    }
+                    if (insidePAResponse) {
                         tagPath.push(tagName); // Push the tag name onto the stack
-                        elementValue = null; // Reset the element value on a start element
+                        elementValue.setLength(0); // Reset the element value
                     }
-                } else if (event.isCharacters()) {
-                    Characters characters = event.asCharacters();
-                    if (!characters.isWhiteSpace()) {
-                        elementValue = characters.getData();
-                    }
+                } else if (event.isCharacters() && insidePAResponse) {
+                    elementValue.append(event.asCharacters().getData());
                 } else if (event.isEndElement()) {
                     EndElement endElement = event.asEndElement();
                     String tagName = endElement.getName().getLocalPart();
                     if ("PAResponse".equals(tagName)) {
                         insidePAResponse = false;
                     } else if (insidePAResponse && !tagPath.isEmpty() && tagName.equals(tagPath.peek())) {
-                        if (elementValue != null) {
-                            // Only print the tag and value if there was a value for this tag
+                        // Only print the tag and value if this is an end tag within PAResponse
+                        if (tagPath.size() > 1) { // Ensure it's not a direct child of PAResponse
                             String fullPath = buildPath(tagPath);
-                            System.out.println(fullPath + ": " + elementValue);
+                            System.out.println(fullPath + ": " + elementValue.toString().trim());
                         }
-                        tagPath.pop(); // This tag is fully processed, remove it
+                        tagPath.pop();
+                        elementValue.setLength(0); // Reset the element value
                     }
                 }
             }
@@ -57,17 +57,19 @@ public class XmlProcessor {
     }
 
     private String buildPath(Stack<String> tagPath) {
-        // We don't include the PAResponse tag in the path, and we don't include the current tag
-        if (tagPath.size() > 1) {
-            Stack<String> tempStack = new Stack<>();
-            tempStack.addAll(tagPath);
-            tempStack.pop(); // Remove the current tag to only get the parent prefix
-            String parentTag = tempStack.pop(); // This will be the immediate parent tag
-            String prefix = parentTag + "_" + tagPath.peek();
-            return prefix;
-        } else {
-            return tagPath.peek();
+        // Join the tags using underscores, but skip the PAResponse tag
+        Stack<String> tempStack = new Stack<>();
+        tempStack.addAll(tagPath);
+        tempStack.pop(); // Remove the current tag
+        
+        StringBuilder pathBuilder = new StringBuilder();
+        while (!tempStack.isEmpty()) {
+            pathBuilder.insert(0, tempStack.pop());
+            if (!tempStack.isEmpty()) {
+                pathBuilder.insert(0, "_");
+            }
         }
+        return pathBuilder.toString();
     }
 
     public static void main(String[] args) {
