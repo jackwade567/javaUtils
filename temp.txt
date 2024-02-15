@@ -16,8 +16,9 @@ public class XmlProcessor {
         try {
             XMLEventReader reader = xmlInputFactory.createXMLEventReader(new FileInputStream(xmlFilePath));
             Stack<String> tagPath = new Stack<>();
-            Stack<Boolean> hasContentStack = new Stack<>(); // Stack to track if tags have content
             boolean insidePAResponse = false;
+            boolean isLeafNode = true;
+            StringBuilder valueBuilder = new StringBuilder();
 
             while (reader.hasNext()) {
                 XMLEvent event = reader.nextEvent();
@@ -28,30 +29,31 @@ public class XmlProcessor {
                     if ("PAResponse".equals(tagName)) {
                         insidePAResponse = true;
                     } else if (insidePAResponse) {
-                        tagPath.push(tagName); // Push the tag name onto the stack
-                        hasContentStack.push(false); // Initialize as false, meaning no content yet
+                        tagPath.push(tagName);
+                        isLeafNode = true; // Assume this is a leaf node until another start element is found
+                        valueBuilder.setLength(0); // Reset the text content builder
                     }
-                } else if (event.isCharacters() && insidePAResponse) {
-                    Characters characters = event.asCharacters();
-                    if (!characters.isWhiteSpace()) {
-                        if (!hasContentStack.isEmpty()) {
-                            hasContentStack.pop();
-                            hasContentStack.push(true); // Set to true, the tag contains content
-                        }
-                    }
+                } else if (event.isCharacters()) {
+                    valueBuilder.append(event.asCharacters().getData());
                 } else if (event.isEndElement()) {
                     EndElement endElement = event.asEndElement();
                     String tagName = endElement.getName().getLocalPart();
                     if ("PAResponse".equals(tagName)) {
                         insidePAResponse = false;
+                        tagPath.clear();
                     } else if (insidePAResponse && !tagPath.isEmpty() && tagName.equals(tagPath.peek())) {
-                        boolean hasContent = !hasContentStack.pop(); // Check if the tag had content
-                        if (!hasContent) { // If no content, this is a leaf node
+                        if (isLeafNode) { // Print only if it's a leaf node
                             String fullPath = buildPath(tagPath);
-                            System.out.println(fullPath + ": "); // Print the tag with an empty value
+                            System.out.println(fullPath + ": " + valueBuilder.toString().trim());
                         }
-                        tagPath.pop(); // The tag is fully processed, remove it from the stack
+                        tagPath.pop();
+                        isLeafNode = !tagPath.isEmpty(); // Reset the flag as we move up the tree
                     }
+                }
+                
+                // If a start element is encountered immediately after another start element, it's not a leaf node
+                if (event.isStartElement() && tagPath.size() > 1) {
+                    isLeafNode = false;
                 }
             }
         } catch (XMLStreamException e) {
@@ -60,18 +62,15 @@ public class XmlProcessor {
     }
 
     private String buildPath(Stack<String> tagPath) {
-        // Skip the 'PAResponse' tag and build the path for the current tag
-        if (!tagPath.isEmpty()) {
-            Stack<String> tempStack = new Stack<>();
-            tempStack.addAll(tagPath);
-            tempStack.pop(); // Remove the current tag to only get the parent tags
-            return String.join("_", tempStack);
-        }
-        return "";
+        Stack<String> tempStack = new Stack<>();
+        tempStack.addAll(tagPath);
+        tempStack.pop(); // Remove the current tag to only get the parent tags
+        return String.join("_", tempStack);
     }
 
     public static void main(String[] args) {
         XmlProcessor processor = new XmlProcessor();
-        processor.printLeafTagValuesWithHierarchy("path_to_your_xml_file.xml"); // Replace with the actual file path
+        // Replace with the actual file path
+        processor.printLeafTagValuesWithHierarchy("/path/to/your/xmlfile.xml");
     }
 }
