@@ -16,7 +16,7 @@ public class XmlProcessor {
             XMLEventReader reader = xmlInputFactory.createXMLEventReader(new FileInputStream(xmlFilePath));
             boolean insidePAResponse = false;
             Stack<String> tagPath = new Stack<>();
-            boolean isValuePrinted = false;
+            boolean isLeaf = true; // Flag to check if the current tag is a leaf
 
             while (reader.hasNext()) {
                 XMLEvent event = reader.nextEvent();
@@ -27,18 +27,14 @@ public class XmlProcessor {
 
                     if ("PAResponse".equals(tagName)) {
                         insidePAResponse = true;
-                        continue; // Skip this tag but mark that we're inside it
-                    }
-
-                    if (insidePAResponse) {
+                    } else if (insidePAResponse) {
                         tagPath.push(tagName); // Push the tag name onto the stack
-                        isValuePrinted = false; // Reset the flag as this is a new tag
+                        isLeaf = true; // Assume this tag is a leaf until we find a nested tag
                     }
                 } else if (event.isCharacters() && insidePAResponse && !event.asCharacters().isWhiteSpace()) {
-                    String value = event.asCharacters().getData();
-                    if (!isValuePrinted) {
+                    if (isLeaf) { // Only print the value if the current tag is a leaf
+                        String value = event.asCharacters().getData();
                         printTagPath(tagPath, value); // Print the tag and value
-                        isValuePrinted = true;
                     }
                 } else if (event.isEndElement()) {
                     EndElement endElement = event.asEndElement();
@@ -50,13 +46,18 @@ public class XmlProcessor {
                     }
 
                     if (insidePAResponse && !tagPath.isEmpty() && tagName.equals(tagPath.peek())) {
-                        if (!isValuePrinted) {
-                            // The tag had no value, print with an empty value
+                        if (isLeaf) {
+                            // If no value was printed for this leaf, print the tag with an empty value
                             printTagPath(tagPath, "");
                         }
-                        tagPath.pop(); // This tag is fully processed, remove it
-                        isValuePrinted = false; // Reset the flag as we might encounter more tags
+                        tagPath.pop(); // Remove the tag from the stack after processing
+                        isLeaf = false; // Reset the leaf flag as we move up the tree
                     }
+                }
+
+                // If we find a start element within another, then the previous tag is not a leaf
+                if (event.isStartElement() && !tagPath.isEmpty()) {
+                    isLeaf = false;
                 }
             }
         } catch (Exception e) {
@@ -67,11 +68,10 @@ public class XmlProcessor {
     private void printTagPath(Stack<String> tagPath, String value) {
         if (!tagPath.isEmpty()) {
             // Create a prefix excluding the 'PAResponse' and the current tag itself
-            String prefix = String.join("_", tagPath.subList(0, tagPath.size() - 1));
+            String prefix = String.join("_", tagPath.subList(1, tagPath.size())); // Exclude the "PAResponse" tag
             if (!prefix.isEmpty()) {
-                prefix += "_"; // Add an underscore only if there is a prefix
+                System.out.println(prefix + ": " + value);
             }
-            System.out.println(prefix + tagPath.peek() + ": " + value);
         }
     }
 
