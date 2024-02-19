@@ -35,8 +35,15 @@ private static class SimpleNamespaceContext implements NamespaceContext {
             System.out.println("Number of PAResponse nodes found: " + paResponseNodes.getLength());
 
             for (int i = 0; i < paResponseNodes.getLength(); i++) {
-                // Extract and process data for each PAResponse node
-                // ...
+                PAResponseEntity entity = new PAResponseEntity();
+
+                XPathExpression exprFirstName = xpath.compile("./script:Patient/script:Name/datatypes:FirstName");
+                String firstName = (String) exprFirstName.evaluate(paResponseNodes.item(i), javax.xml.xpath.XPathConstants.STRING);
+                entity.setPatientFirstName(firstName); // Use the actual method to set the first name in your entity
+
+                // ... (repeat for other fields)
+
+                System.out.println(entity.toString());
             }
 
         } catch (Exception e) {
