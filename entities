@@ -1,0 +1,340 @@
+@Entity
+public class PrimePriorAuths {
+    @Id
+    @Column(name="pareferenceid")
+    private int pareferenceid;
+	
+    @Column(name="hcc_id")
+    private String hccId;
+	
+    @Column(name="patient_name_lastname")
+    private String patientNameLastname;
+	
+    @Column(name = "patient_name_firstname")
+    private String patientNameFirstname;
+	
+    @Column(name = "patient_gender")
+    private String patientGender;
+    
+    @Column(name = "patient_dateofbirth_date")
+    @Temporal(TemporalType.DATE)
+    private Date patientDateOfBirth;
+    
+    @Column(name = "patient_address_addressline1")
+    private String patientAddressLine1;
+    
+    @Column(name = "patient_address_city")
+    private String patientAddressCity;
+
+    @Column(name = "patient_address_stateprovince")
+    private String patientAddressStateProvince;
+
+    @Column(name = "patient_address_postalcode")
+    private String patientAddressPostalCode;
+
+    @Column(name = "patient_address_countrycode")
+    private String patientAddressCountryCode;
+
+    @Column(name = "pharmacy_identification_ncpdpid")
+    private String pharmacyIdentificationNcpdpId;
+
+    @Column(name = "pharmacy_identification_npi")
+    private String pharmacyIdentificationNpi;
+    
+    @Column(name = "pharmacy_pharmacist_lastname")
+    private String pharmacyPharmacistLastname;
+
+    @Column(name = "pharmacy_pharmacist_firstname")
+    private String pharmacyPharmacistFirstname;
+
+    @Column(name = "pharmacy_businessname")
+    private String pharmacyBusinessName;
+
+    @Column(name = "pharmacy_address_addressline1")
+    private String pharmacyAddressLine1;
+
+    @Column(name = "pharmacy_address_city")
+    private String pharmacyAddressCity;
+    
+    @Column(name = "pharmacy_address_stateprovince")
+    private String pharmacyAddressStateProvince;
+
+    @Column(name = "pharmacy_address_postalcode")
+    private String pharmacyAddressPostalCode;
+
+    @Column(name = "pharmacy_address_countrycode")
+    private String pharmacyAddressCountryCode;
+
+    @Column(name = "prescriber_identification_npi")
+    private String prescriberIdentificationNpi;
+
+    @Column(name = "prescriber_name_lastname")
+    private String prescriberNameLastname;
+    
+    @Column(name = "prescriber_name_firstname")
+    private String prescriberNameFirstname;
+
+    @Column(name = "prescriber_address_addressline1")
+    private String prescriberAddressLine1;
+
+    @Column(name = "prescriber_address_city")
+    private String prescriberAddressCity;
+
+    @Column(name = "prescriber_address_stateprovince")
+    private String prescriberAddressStateProvince;
+
+    @Column(name = "prescriber_address_postalcode")
+    private String prescriberAddressPostalCode;
+    
+    @Column(name = "prescriber_address_countrycode")
+    private String prescriberAddressCountryCode;
+
+    @Column(name = "prescriber_communicationnumbers_primarytelephone_number")
+    private String prescriberCommunicationNumbersPrimaryTelephone;
+
+    @Column(name = "prescriber_communicationnumbers_fax_number")
+    private String prescriberCommunicationNumbersFax;
+
+    @Column(name = "medicationprescribed_drugdescription")
+    private String medicationPrescribedDrugDescription;
+
+    @Column(name = "medicationprescribed_drugcoded_productcode_code")
+    private String medicationPrescribedDrugCodedProductCode;
+
+    @Column(name = "medicationprescribed_drugcoded_productcode_qualifier")
+    private String medicationPrescribedDrugCodedProductCodeQualifier;
+    
+    @Column(name = "medicationprescribed_quantity_value")
+    private String medicationPrescribedQuantityValue;
+
+    @Column(name = "medicationprescribed_quantity_codelistqualifier")
+    private String medicationPrescribedQuantityCodeListQualifier;
+
+    @Column(name = "medicationprescribed_quantity_quantityunitofmeasure_code")
+    private String medicationPrescribedQuantityUnitOfMeasureCode;
+
+    @Column(name = "medicationprescribed_sig_sigtext")
+    private String medicationPrescribedSigSigText;
+
+    @Column(name = "medicationprescribed_sig_codesystem_snomedversion")
+    private String medicationPrescribedSigCodeSystemSnomedVersion;
+
+    @Column(name = "medicationprescribed_sig_codesystem_fmtversion")
+    private String medicationPrescribedSigCodeSystemFmtVersion;
+    
+    @Column(name = "medicationprescribed_sig_ins_da_dosedeliverymethod_text")
+    private String medicationPrescribedSigInsDaDoseDeliveryMethodText;
+
+    @Column(name = "medicationprescribed_sig_ins_da_dosedeliverymethod_qualifier")
+    private String medicationPrescribedSigInsDaDoseDeliveryMethodQualifier;
+
+    @Column(name = "medicationprescribed_sig_ins_da_dosedeliverymethod_code")
+    private String medicationPrescribedSigInsDaDoseDeliveryMethodCode;
+
+    @Column(name = "medicationprescribed_sig_ins_da_doseamount_text")
+    private String medicationPrescribedSigInsDaDoseAmountText;
+
+    @Column(name = "medicationprescribed_sig_ins_da_doseamount_qualifier")
+    private String medicationPrescribedSigInsDaDoseAmountQualifier;
+
+    @Column(name = "medicationprescribed_sig_ins_da_doseamount_code")
+    private String medicationPrescribedSigInsDaDoseAmountCode;
+    
+    @Column(name = "medicationprescribed_sig_ins_da_doseclarifyingfreetext")
+    private String medicationPrescribedSigInsDaDoseClarifyingFreeText;
+
+    @Column(name = "medicationprescribed_sig_ins_da_doseform_text")
+    private String medicationPrescribedSigInsDaDoseFormText;
+
+    @Column(name = "medicationprescribed_sig_ins_da_doseform_qualifier")
+    private String medicationPrescribedSigInsDaDoseFormQualifier;
+
+    @Column(name = "medicationprescribed_sig_ins_da_doseform_code")
+    private String medicationPrescribedSigInsDaDoseFormCode;
+
+    @Column(name = "medicationprescribed_sig_ins_da_routeofadministration_text")
+    private String medicationPrescribedSigInsDaRouteOfAdministrationText;
+
+    @Column(name = "medicationprescribed_sig_ins_da_routeofadministration_qualifier")
+    private String medicationPrescribedSigInsDaRouteOfAdministrationQualifier;
+    
+    @Column(name = "medicationprescribed_sig_ins_da_routeofadministration_code")
+    private String medicationPrescribedSigInsDaRouteOfAdministrationCode;
+
+    @Column(name = "medicationprescribed_sig_ins_da_siteofadministration_text")
+    private String medicationPrescribedSigInsDaSiteOfAdministrationText;
+
+    @Column(name = "medicationprescribed_sig_ins_da_siteofadministration_qualifier")
+    private String medicationPrescribedSigInsDaSiteOfAdministrationQualifier;
+
+    @Column(name = "medicationprescribed_sig_ins_da_siteofadministration_code")
+    private String medicationPrescribedSigInsDaSiteOfAdministrationCode;
+
+    @Column(name = "medicationprescribed_sig_ins_td_frequency_frequencynumericvalue")
+    private String medicationPrescribedSigInsTdFrequencyFrequencyNumericValue;
+
+    @Column(name = "medicationprescribed_sig_ins_td_frequency_frequencyunits_text")
+    private String medicationPrescribedSigInsTdFrequencyFrequencyUnitsText;
+    
+    @Column(name = "medicationprescribed_sig_ins_td_frequency_frequencyunits_qualifier")
+    private String medicationPrescribedSigInsTdFrequencyFrequencyUnitsQualifier;
+
+    @Column(name = "medicationprescribed_sig_ins_td_frequency_frequencyunits_code")
+    private String medicationPrescribedSigInsTdFrequencyFrequencyUnitsCode;
+
+    @Column(name = "medicationprescribed_sig_ins_td_timingclarifyingfreetext")
+    private String medicationPrescribedSigInsTdTimingClarifyingFreeText;
+
+    @Column(name = "provider_name_lastname")
+    private String providerNameLastname;
+
+    @Column(name = "provider_name_firstname")
+    private String providerNameFirstname;
+
+    @Column(name = "provider_address_addressline1")
+    private String providerAddressAddressLine1;
+
+    @Column(name = "provider_address_city")
+    private String providerAddressCity;
+    
+    @Column(name = "provider_address_stateprovince")
+    private String providerAddressStateProvince;
+
+    @Column(name = "provider_address_postalcode")
+    private String providerAddressPostalCode;
+
+    @Column(name = "provider_address_countrycode")
+    private String providerAddressCountryCode;
+
+    @Column(name = "response_responsestatus_denied_pacaseid")
+    private String responseResponseStatusDeniedPaCaseId;
+
+    @Column(name = "response_responsestatus_denied_appeal_iseappealsupported")
+    private String responseResponseStatusDeniedAppealIsAppealSupported;
+
+    @Column(name = "response_responsestatus_denied_appeal_panote")
+    private String responseResponseStatusDeniedAppealPaNote;
+    
+    @Column(name = "paadditionaldata_benefittype")
+    private String paadditionaldataBenefittype;
+
+    @Column(name = "paadditionaldata_procedurecode")
+    private String paadditionaldataProcedurecode;
+
+    @Column(name = "paadditionaldata_proceduretypecode")
+    private String paadditionaldataProceduretypecode;
+
+    @Column(name = "paadditionaldata_pasystemrequestreceiveddatetime_date")
+    @Temporal(TemporalType.DATE)
+    private Date paadditionaldataPasystemrequestreceiveddatetimeDate;
+
+    @Column(name = "paadditionaldata_finaloutcomedatetime_date")
+    @Temporal(TemporalType.DATE)
+    private Date paadditionaldataFinaloutcomedatetimeDate;
+
+    @Column(name = "paadditionaldata_parequeststatus")
+    private String paadditionaldataParequeststatus;
+
+    @Column(name = "paadditionaldata_additionaldrugcode_code")
+    private String paadditionaldataAdditionaldrugcodeCode;
+
+    @Column(name = "paadditionaldata_additionaldrugcode")
+    private String paadditionaldataAdditionaldrugcode;
+
+    @Column(name = "paadditionaldata_casetypecode")
+    private String paadditionaldataCasetypecode;
+
+    @Column(name = "paadditionaldata_requesteddrugquantity")
+    private String paadditionaldataRequesteddrugquantity;
+
+    @Column(name = "paadditionaldata_requesteddrugunitofmeasure")
+    private String paadditionaldataRequesteddrugunitofmeasure;
+
+    @Column(name = "paadditionaldata_plancode")
+    private String paadditionaldataPlancode;
+
+    @Column(name = "paadditionaldata_patientaddressline2")
+    private String paadditionaldataPatientaddressline2;
+
+    @Column(name = "paadditionaldata_patientphonenumber")
+    private String paadditionaldataPatientphonenumber;
+
+    @Column(name = "paadditionaldata_caseoutcomecode")
+    private String paadditionaldataCaseoutcomecode;
+
+    @Column(name = "paadditionaldata_casestatuscode")
+    private String paadditionaldataCasestatuscode;
+
+    @Column(name = "paadditionaldata_casestatusdesc")
+    private String paadditionaldataCasestatusdesc;
+
+    @Column(name = "paadditionaldata_genericdrugflag")
+    private String paadditionaldataGenericdrugflag;
+
+    @Column(name = "paadditionaldata_drugstrength")
+    private String paadditionaldataDrugstrength;
+
+    @Column(name = "paadditionaldata_diagnosisdescription")
+    private String paadditionaldataDiagnosisdescription;
+
+    @Column(name = "paadditionaldata_provideraddressline2")
+    private String paadditionaldataProvideraddressline2;
+
+    @Column(name = "paadditionaldata_tollstartdate")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date paadditionaldataTollstartdate;
+
+    @Column(name = "paadditionaldata_tollenddate")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date paadditionaldataTollenddate;
+
+    @Column(name = "paadditionaldata_receiveddatesupportingstatement")
+    private String paadditionaldataReceiveddatesupportingstatement;
+
+    @Column(name = "paadditionaldata_receiveddatepaymentstatement")
+    private String paadditionaldataReceiveddatepaymentstatement;
+
+    @Column(name = "paadditionaldata_contractid")
+    private String paadditionaldataContractid;
+
+    @Column(name = "paadditionaldata_requestclassificationcode")
+    private String paadditionaldataRequestclassificationcode;
+
+    @Column(name = "paadditionaldata_requesttype")
+    private String paadditionaldataRequesttype;
+
+    @Column(name = "paadditionaldata_physicianreviewdatetime")
+    private String paadditionaldataPhysicianreviewdatetime;
+
+    @Column(name = "paadditionaldata_datefilesenttoire")
+    private String paadditionaldataDatefilesenttoire;
+
+    @Column(name = "paadditionaldata_targetduedate")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date paadditionaldataTargetduedate;
+
+    @Column(name = "paadditionaldata_deniedduetolackofsuppinfo")
+    private char paadditionaldataDeniedduetolackofsuppinfo;
+
+    @Column(name = "paadditionaldata_addressline2")
+    private String paadditionaldataAddressline2;
+
+    @Column(name = "paadditionaldata_denyforlackofmedicalnecessity")
+    private String paadditionaldataDenyforlackofmedicalnecessity;
+
+    @Column(name = "paadditionaldata_casetype")
+    private String paadditionaldataCasetype;
+
+    @Column(name = "paadditionaldata_hashospice")
+    private String paadditionaldataHashospice;
+    
+    @Column(name = "created_date_time" , columnDefinition="TIMESTAMP WITHOUT TIME ZONE")
+    private LocalDateTime createdDateTime;
+
+    @Column(name = "last_update_date_time" , columnDefinition="TIMESTAMP WITHOUT TIME ZONE")
+    private LocalDateTime lastUpdateDateTime;
+
+
+	
+
+}
