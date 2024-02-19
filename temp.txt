@@ -1,76 +1,50 @@
-import javax.xml.stream.XMLInputFactory;
-import javax.xml.stream.XMLEventReader;
-import javax.xml.stream.events.XMLEvent;
-import javax.xml.stream.events.StartElement;
-import javax.xml.stream.events.Characters;
-import javax.xml.stream.events.EndElement;
-import javax.xml.stream.XMLStreamException;
-import java.io.FileInputStream;
-import java.util.Stack;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.DocumentBuilder;
+import org.w3c.dom.Document;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathFactory;
+import javax.xml.xpath.XPathExpression;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+import org.w3c.dom.NodeList;
 
-public class XmlProcessor {
+public class XmlParser {
 
-    public void printLeafTagValuesWithHierarchy(String xmlFilePath) {
-        XMLInputFactory xmlInputFactory = XMLInputFactory.newInstance();
+    public List<PAResponseEntity> parseXmlToEntities(String xmlFilePath) {
+        List<PAResponseEntity> entities = new ArrayList<>();
 
         try {
-            XMLEventReader reader = xmlInputFactory.createXMLEventReader(new FileInputStream(xmlFilePath));
-            Stack<String> tagPath = new Stack<>();
-            boolean insidePAResponse = false;
-            boolean isLeafNode = true;
-            StringBuilder valueBuilder = new StringBuilder();
+            File xmlFile = new File(xmlFilePath);
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder builder = factory.newDocumentBuilder();
+            Document document = builder.parse(xmlFile);
+            document.getDocumentElement().normalize();
 
-            while (reader.hasNext()) {
-                XMLEvent event = reader.nextEvent();
+            XPathFactory xpathFactory = XPathFactory.newInstance();
+            XPath xpath = xpathFactory.newXPath();
 
-                if (event.isStartElement()) {
-                    StartElement startElement = event.asStartElement();
-                    String tagName = startElement.getName().getLocalPart();
-                    if ("PAResponse".equals(tagName)) {
-                        insidePAResponse = true;
-                    } else if (insidePAResponse) {
-                        tagPath.push(tagName);
-                        isLeafNode = true; // Assume this is a leaf node until another start element is found
-                        valueBuilder.setLength(0); // Reset the text content builder
-                    }
-                } else if (event.isCharacters()) {
-                    valueBuilder.append(event.asCharacters().getData());
-                } else if (event.isEndElement()) {
-                    EndElement endElement = event.asEndElement();
-                    String tagName = endElement.getName().getLocalPart();
-                    if ("PAResponse".equals(tagName)) {
-                        insidePAResponse = false;
-                        tagPath.clear();
-                    } else if (insidePAResponse && !tagPath.isEmpty() && tagName.equals(tagPath.peek())) {
-                        if (isLeafNode) { // Print only if it's a leaf node
-                            String fullPath = buildPath(tagPath);
-                            System.out.println(fullPath + ": " + valueBuilder.toString().trim());
-                        }
-                        tagPath.pop();
-                        isLeafNode = !tagPath.isEmpty(); // Reset the flag as we move up the tree
-                    }
-                }
-                
-                // If a start element is encountered immediately after another start element, it's not a leaf node
-                if (event.isStartElement() && tagPath.size() > 1) {
-                    isLeafNode = false;
-                }
+            // Example XPath expressions - adjust as needed
+            XPathExpression exprPAResponse = xpath.compile("//PAResponse");
+            NodeList paResponseNodes = (NodeList) exprPAResponse.evaluate(document, javax.xml.xpath.XPathConstants.NODESET);
+
+            for (int i = 0; i < paResponseNodes.getLength(); i++) {
+                PAResponseEntity entity = new PAResponseEntity();
+
+                // Example for one field - replace 'path/to/element' with the actual XPath
+                XPathExpression exprField1 = xpath.compile("path/to/element");
+                String field1Value = (String) exprField1.evaluate(paResponseNodes.item(i), javax.xml.xpath.XPathConstants.STRING);
+                entity.setEntityField1(field1Value);
+
+                // Repeat for other fields...
+
+                entities.add(entity);
             }
-        } catch (XMLStreamException e) {
+
+        } catch (Exception e) {
             e.printStackTrace();
         }
-    }
 
-    private String buildPath(Stack<String> tagPath) {
-        Stack<String> tempStack = new Stack<>();
-        tempStack.addAll(tagPath);
-        tempStack.pop(); // Remove the current tag to only get the parent tags
-        return String.join("_", tempStack);
-    }
-
-    public static void main(String[] args) {
-        XmlProcessor processor = new XmlProcessor();
-        // Replace with the actual file path
-        processor.printLeafTagValuesWithHierarchy("/path/to/your/xmlfile.xml");
+        return entities;
     }
 }
