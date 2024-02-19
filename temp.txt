@@ -7,6 +7,16 @@ import org.w3c.dom.NodeList;
 import java.io.File;
 
 public class XmlParser {
+private static class SimpleNamespaceContext implements NamespaceContext {
+        public String getNamespaceURI(String prefix) {
+            if (prefix == null) throw new IllegalArgumentException("No prefix provided!");
+            else if ("prime".equals(prefix)) return "http://primetherapeutics.com/ncpdp-ext/transport";
+            else if ("script".equals(prefix)) return "http://www.ncpdp.org/schema/script";
+            else return XMLConstants.NULL_NS_URI;
+        }
+        public String getPrefix(String uri) { return null; }
+        public Iterator getPrefixes(String uri) { return null; }
+    }
 
     public void parseXml(String xmlFilePath) {
         try {
