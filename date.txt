@@ -1,0 +1,22 @@
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
+public class DateUtils {
+
+    public static Date parseDate(String dateString, String dateFormat) {
+        if (dateString == null || dateString.trim().isEmpty()) {
+            return null;
+        }
+
+        SimpleDateFormat formatter = new SimpleDateFormat(dateFormat);
+        try {
+            return formatter.parse(dateString);
+        } catch (ParseException e) {
+            // This line is optional, you could also choose to return null or log the error
+            throw new IllegalArgumentException("Unparseable date: \"" + dateString + "\" with format \"" + dateFormat + "\"");
+        }
+    }
+
+    // Example usage
+    public static void
