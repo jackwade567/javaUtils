@@ -1,0 +1,47 @@
+import jcifs.smb.NtlmPasswordAuthentication;
+import jcifs.smb.SmbFile;
+import org.springframework.stereotype.Service;
+
+@Service
+public class SMBService {
+
+    public void accessSharedFolder(String sharedPath, String username, String password) {
+        try {
+            // Set up authentication
+            NtlmPasswordAuthentication auth = new NtlmPasswordAuthentication("", username, password);
+
+            // Access the shared folder
+            SmbFile dir = new SmbFile(sharedPath, auth);
+
+            // List files in the directory (just as an example of operation)
+            for (SmbFile f : dir.listFiles()) {
+                System.out.println(f.getName());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+}
+
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+public class SMBController {
+
+    @Autowired
+    private SMBService smbService;
+
+    @GetMapping("/listFiles")
+    public String listFiles() {
+        // Example shared folder path and credentials
+        String sharedPath = "smb://hostname/sharename/";
+        String username = "yourUsername";
+        String password = "yourPassword";
+
+        smbService.accessSharedFolder(sharedPath, username, password);
+        return "Files listed in console";
+    }
+}
