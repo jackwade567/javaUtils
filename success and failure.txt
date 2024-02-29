@@ -1,0 +1,49 @@
+Subject: Data Load Service Notification - SUCCESS for [Date]
+
+Dear [Recipient Name],
+
+I hope this message finds you well. I am pleased to inform you that the data load service successfully completed its operation for the day.
+
+Summary of the Data Load:
+
+Date of Operation: [Date]
+File Processed: [Filename]
+Records Loaded: [Number of Records]
+Start Time of Load: [Start Time]
+End Time of Load: [End Time]
+Status: SUCCESS
+The data is now available for reporting and analysis. Should you require any further details or have any questions regarding this load, please do not hesitate to reach out.
+
+Thank you for your attention to this matter.
+
+Best regards,
+[Your Name]
+[Your Position]
+[Your Contact Information]
+
+
+
+Subject: Data Load Service Notification - FAILURE for [Date]
+
+Dear [Recipient Name],
+
+I regret to inform you that the data load service encountered an issue on [Date] and did not complete successfully.
+
+Summary of the Attempted Data Load:
+
+Date of Operation: [Date]
+File Attempted: [Filename]
+Records Processed before Failure: [Number of Records]
+Start Time of Load: [Start Time]
+Time of Failure: [Time of Failure]
+Status: FAILURE
+The technical team has been notified and is currently investigating the cause of this issue. We are prioritizing this matter and are working diligently to resolve it promptly. I will keep you updated on our progress and notify you once the issue has been resolved and the data load process has been successfully rerun.
+
+We apologize for any inconvenience this may cause and appreciate your understanding.
+
+If you have any immediate concerns or need further assistance, please feel free to contact me directly.
+
+Warm regards,
+[Your Name]
+[Your Position]
+[Your Contact Information]
