@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<body>
+    <div style="width: 80%; margin: 20px auto; background: #ffffff; padding: 20px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+        <div style="background-color: #4CAF50; color: white; padding: 10px; text-align: center; border-radius: 8px 8px 0 0;">
+            <h2>Data Load Service Report</h2>
+        </div>
+        <div style="margin-top: 20px;">
+            <p>Dear [Recipient Name],</p>
+            <p>I hope this message finds you well. I am pleased to inform you that the data load service successfully completed its operation for the day.</p>
+            <p><strong>Summary of the Data Load:</strong><br>
+            Date of Operation: [Date]<br>
+            File Processed: [Filename]<br>
+            Records Loaded: [Number of Records]<br>
+            Start Time of Load: [Start Time]<br>
+            End Time of Load: [End Time]<br>
+            Status: SUCCESS</p>
+            <p>The data is now available for reporting and analysis. Should you require any further details or have any questions regarding this load, please do not hesitate to reach out.</p>
+            <p>Thank you for your attention to this matter.</p>
+            <p>Best regards,<br>
+            [Your Name]<br>
+            [Your Position]<br>
+            [Your Contact Information]</p>
+        </div>
+        <div style="background-color: #333333; color: white; text-align: center; padding: 10px; border-radius: 0 0 8px 8px;">
+            &copy; [Current Year] Your Company Name. All rights reserved.
+        </div>
+    </div>
+</body>
+</html>
